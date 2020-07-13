@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <fstream>
+#include <pthread.h>
 
 #include "host_graph_sw.h"
 
@@ -28,7 +29,7 @@ typedef struct
     unsigned int id;
     int node[2];
     unsigned int p;
-    unsigned int neighbor_counter;
+    unsigned int update_counter;
 } sample_edge;
 
 
@@ -37,11 +38,26 @@ typedef struct {
     double expecation;
     sample_edge first_edge;
     sample_edge second_edge;
+    unsigned int neighbor_counter;
     unsigned int neighbor_id;
     unsigned char neighbor_flag;
     unsigned int status;
 
 } estimator;
+
+typedef struct
+{
+    pthread_t pid;
+    estimator *est;
+    Graph* gptr;
+    CSR* csr;
+    double expecation;
+    unsigned int run;
+    unsigned int counter;
+} thread_item;
+
+#define MAX_NUN_THREADS 16
+thread_item   threads[MAX_NUN_THREADS];
 
 #define  MAX_NUM_ESTIMATOR  (1000 * 1000 * 10)
 
@@ -57,15 +73,93 @@ estimator local_estimator[MAX_NUM_ESTIMATOR];
 const double ratio = 1.0 / (double(1 << RNG_RANGE_MAX));
 
 
-int reservoir_sampling(int n)
+int reservoir_sampling(int n, mt19937 &lmt)
 {
-    int rn = static_cast<int>(ui(mt));
+    int rn = static_cast<int>(ui(lmt));
     float p = float(rn) * ratio;
-    float p0 = 1.0f / (n + 1);
+    float p0 = 1.0f / (n);
     if (p < p0)
     {
         return 1;
     }
+    return 0;
+}
+
+
+
+int approximation(estimator *p_est, Graph* gptr, CSR* csr)
+{
+    mt19937 mt;
+    mt.seed(static_cast<unsigned int>(std::time(0)) + (unsigned long)(p_est));
+    memset(p_est, 0, sizeof(estimator));
+    int edgeNum   = csr ->edgeNum;
+
+    sample_edge * p_first    = &p_est->first_edge;
+    sample_edge * p_second    = &p_est->second_edge;
+    p_est->status = 0;
+
+    for (int i = 0; i < edgeNum; i++)
+    {
+        if (reservoir_sampling(i, mt))
+        {
+            p_est->first_edge.node[0] = gptr->data[i][0];
+            p_est->first_edge.node[1] = gptr->data[i][1];
+            p_first->update_counter ++;
+            p_est->neighbor_counter = 0;
+        }
+        else
+        {
+            int ln = gptr->data[i][0];
+            int rn = gptr->data[i][1];
+
+
+            int adjacent_flag = 0;
+            if ((ln == p_first->node[0]) || (rn == p_first->node[0]))
+            {
+                p_est->neighbor_flag = 1;
+                adjacent_flag = 1;
+            }
+            else if ((ln == p_first->node[1]) || (rn == p_first->node[1]))
+            {
+                p_est->neighbor_flag = 0;
+                adjacent_flag = 1;
+            }
+
+            if (adjacent_flag == 1)
+            {
+                p_est->neighbor_counter ++;
+                if (reservoir_sampling(p_est->neighbor_counter, mt))
+                {
+                    p_second->node[0] =  (p_first->node[1] == ln) ? ln : rn;
+                    p_second->node[1] =  (p_first->node[1] == ln) ? rn : ln;
+                    p_second->update_counter ++;
+                }
+                else
+                {
+                    if (((ln == p_first->node[p_est->neighbor_flag]) && (rn == p_second->node[1]))
+                            || ((rn == p_first->node[p_est->neighbor_flag]) && (ln == p_second->node[1])))
+
+                    {
+
+                        p_est->expecation = p_est->neighbor_counter ;
+                        p_est->status = 1;
+                        return 1;
+                    }
+                }
+
+            }
+        }
+    }
+
+    return  0;
+}
+
+void *approximation_thread(void *argv)
+{
+
+    //DEBUG_PRINTF("here\n");
+    thread_item *p_data = (thread_item *)argv;
+    approximation(p_data->est, p_data->gptr, p_data->csr);
     return 0;
 }
 
@@ -76,12 +170,6 @@ graphInfo graphDataInfo;
 #define EST_NUM                 (10)
 
 int main(int argc, char **argv) {
-
-    char * xcl_file = NULL;
-    if (argc > 1)
-    {
-        xcl_file = argv[1];
-    }
 
     std::string gName;
     if (argc > 2)
@@ -112,12 +200,11 @@ int main(int argc, char **argv) {
     Graph* gptr = createGraph(gName, mode);
     CSR* csr    = new CSR(*gptr);
 
-    int vertexNum = csr ->vertexNum;
     int edgeNum   = csr ->edgeNum;
 
 
 //ARRAY_SIZE(local_estimator)
-    int est_num_map [] = { 10, 100, 1000, 2000,
+    int est_num_map [] = { 16, 100, 1000, 2000,
                            5000, 10000, 20000, 50000,
                            100000, 200000, 500000, 1000 * 1000,
                            1000 * 1000 * 2, 1000 * 1000 * 5
@@ -128,170 +215,84 @@ int main(int argc, char **argv) {
         est_num = est_num_map[k];
         for (int repeat = 0; repeat < 1; repeat ++)
         {
-            for (int i = 0 ; i < est_num; i ++)
+
+            for (int j = 0; j < ARRAY_SIZE(threads); j++)
             {
-                estimator  * p_est =  &local_estimator[i];
-                sample_edge * p_edge = &p_est->first_edge;
-                int rn = static_cast<int>(ui(mt));
-                int id = int((double (rn)) * ratio  * edgeNum);
-                //printf("%d@%d %x id\n", id, edgeNum, rn);
-                p_edge->id = id;
-                p_edge->node[0] =  gptr->data[id][0];
-                p_edge->node[1] =  gptr->data[id][1];
-                p_edge->p = edgeNum;
-                p_est->status = STATUS_SECOND_EDGE;
+                threads[j].expecation = 0.0;
+                threads[j].counter = 0;
+                threads[j].run = 0;
             }
-            int success_counter = 0;
 
-            for (int i = 0; i < est_num; i++)
+            for (int i = 0 ; i < est_num / 16; i ++)
             {
-                estimator * p_est       = &local_estimator[i];
-                sample_edge * p_edge    = &p_est->first_edge;
-                sample_edge * p_second_edge = &p_est->second_edge;
-
-                p_edge->neighbor_counter = 0;
-                for (int j = p_edge->id + 1; j < edgeNum; j++)
+                for (int j = 0; j < ARRAY_SIZE(threads); j++)
                 {
-                    int ln =  gptr->data[j][0];
-                    int rn =  gptr->data[j][1];
-                    if ((ln == p_edge->node[1]) || (rn == p_edge->node[1]))
-                    {
-                        p_edge->neighbor_counter ++;
-                        p_est->neighbor_flag = 0;
-                    }
-#if 0
-                    else if ((ln == p_edge->node[0]) || (rn == p_edge->node[0]))
-                    {
-                        p_edge->neighbor_counter ++;
-                        p_est->neighbor_flag = 1;
-                    }
-#endif
+                    threads[j].est  = &local_estimator[j];
+                    threads[j].gptr = gptr;
+                    threads[j].csr  = csr;
+                    pthread_create(&threads[j].pid, NULL, approximation_thread, &threads[j]);
                 }
-                int rng = static_cast<int>(ui(mt));
-                p_est->neighbor_id = int((double (rng)) * ratio  * p_edge->neighbor_counter);
-                while (1)
+
+                for (int j = 0; j < ARRAY_SIZE(threads); j++)
                 {
-                    if(p_est->status== STATUS_END)
-                    {
-                        break;
-                    }
-                    switch (p_est->status)
-                    {
-                    case STATUS_SECOND_EDGE:
-                    {
+                    pthread_join(threads[j].pid, NULL);
+                    threads[j].expecation += local_estimator[j].expecation;
+                    threads[j].counter += local_estimator[j].status;
+                    threads[j].run ++;
+                    estimator * p_est    = &local_estimator[j];
+                    sample_edge * p_first     = &p_est->first_edge;
+                    sample_edge * p_second = &p_est->second_edge;
 
-                        unsigned int local_neighbor_counter = 0;
-                        p_est->status = STATUS_END;
-                        for (int j = p_edge->id + 1; j < edgeNum; j++)
-                        {
-
-                            int ln =  gptr->data[j][0];
-                            int rn =  gptr->data[j][1];
-                            if ((ln == p_edge->node[1]) || (rn == p_edge->node[1]))
-                            {
-
-                                if (local_neighbor_counter == p_est->neighbor_id)
-                                    //if (reservoir_sampling(p_edge->neighbor_counter) == 1)
-                                {
-
-                                    p_second_edge->id = j;
-                                    p_second_edge->node[0] =  (p_edge->node[1] == ln) ? ln : rn;
-                                    p_second_edge->node[1] =  (p_edge->node[1] == ln) ? rn : ln;
-                                    p_second_edge->p = p_edge->neighbor_counter;
-
-                                    p_est->status = STATUS_CLOSE;
-                                    break;
-                                }
-                                local_neighbor_counter ++;
-                            }
-#if 0
-                            else if ((ln == p_edge->node[0]) || (rn == p_edge->node[0]))
-                            {
-
-                                if (local_neighbor_counter == p_est->neighbor_id)
-                                    //if (reservoir_sampling(p_edge->neighbor_counter) == 1)
-                                {
-
-                                    p_second_edge->id = j;
-                                    p_second_edge->node[0] =  (p_edge->node[0] == ln) ? ln : rn;
-                                    p_second_edge->node[1] =  (p_edge->node[0] == ln) ? rn : ln;
-                                    p_second_edge->p = p_edge->neighbor_counter;
-
-                                    p_est->status = STATUS_CLOSE;
-                                    break;
-                                }
-                                local_neighbor_counter ++;
-                            }
-#endif
-                        }
-                        break;
-                    }
-                    case STATUS_CLOSE:
-                    {
-
-
-                        p_est->expecation = 0;
-#if 1
-                        int node = p_edge->node[p_est->neighbor_flag ] ;
-                        //printf("node %d -> %d\n", node, p_second_edge->node[1]);
-
-                        for (int j = csr->rpao[node]; j < csr->rpao[node + 1]; j++)
-                        {
-                            //printf("%d\n", csr->ciao[j]);
-                            if (csr->ciao[j] == p_second_edge->node[1])
-                            {
-                                success_counter ++;
-                                p_est->expecation = p_edge->p *  p_second_edge->p;
-                                break;
-                            }
-                        }
-                       
-#else
-                        for (int j = p_second_edge->id + 1; j < edgeNum; j++)
-                        {
-                            int ln =  gptr->data[j][0];
-                            int rn =  gptr->data[j][1];
-                            if (((ln == p_edge->node[p_est->neighbor_flag]) && (rn == p_second_edge->node[1])) ||
-                                ((rn == p_edge->node[p_est->neighbor_flag]) && (ln == p_second_edge->node[1])))
-
-                            {
-                                success_counter ++;
-                                p_est->expecation = p_edge->p *  p_second_edge->p;
-                                break;
-                            }
-                        }
-#endif
-                        p_est->status = STATUS_END;
-                        break;
-
-                    }
-                    }
+                    DEBUG_PRINTF("%d nc %d (%d %d) [%d %d] [%d %d]\n",
+                                 p_est->status ,
+                                 p_est->neighbor_counter,
+                                 p_first->update_counter,
+                                 p_second->update_counter,
+                                 p_first->node[0],
+                                 p_first->node[1],
+                                 p_second->node[0],
+                                 p_second->node[1]);
 
                 }
+
+                //estimator * p_est    = &local_estimator[i];
+
+                //success_counter += approximation(p_est, gptr, csr);
             }
             double result = 0;
-            unsigned int  failed_counter = 0;
+            int total_est_num = 0;
+            int success_counter = 0;
+
+            for (int j = 0; j < ARRAY_SIZE(threads); j++)
+            {
+                result += threads[j].expecation;
+                total_est_num += threads[j].run;
+                success_counter += threads[j].counter;
+
+            }
+#if 0
             for (int i = 0; i < est_num; i++)
             {
 
                 estimator * p_est    = &local_estimator[i];
                 sample_edge * p_edge    = &p_est->first_edge;
                 sample_edge * p_second_edge = &p_est->second_edge;
-#if 0
+
                 DEBUG_PRINTF("id %d nc %d %d status %d [%d %d] [%d %d]\n",
                              p_edge->id,
-                             p_edge->neighbor_counter,
+                             p_est->neighbor_counter,
                              p_est->neighbor_id,
                              p_second_edge->id,
                              p_edge->node[0],
                              p_edge->node[1],
                              p_second_edge->node[0],
                              p_second_edge->node[1]);
-#endif
+
                 result     += p_est->expecation;
             }
-            DEBUG_PRINTF("result %lf @ %d with %d,total %d \n", (double(result) / est_num),
-                         repeat, est_num,
+#endif
+            DEBUG_PRINTF("result %lf @ %d with %d,total %d \n", (double(result * edgeNum) / total_est_num),
+                         repeat, total_est_num,
                          success_counter);
         }
     }

@@ -1,0 +1,13 @@
+
+rmat-19-32 3-clique
+Finished reading datagraph: |V| = 381494 |E| = 14864980
+[2-3][1-2][1-3]: 759390466
+
+rmat-21-32 3-clique
+Finished reading datagraph: |V| = 1431179 |E| = 61725291
+[2-3][1-2][1-3]: 4025463515
+
+DBLP 3-clique
+Finished reading datagraph: |V| = 317080 |E| = 1049866
+[2-3][1-2][1-3]: 2224385
+
