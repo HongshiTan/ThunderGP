@@ -61,7 +61,7 @@ Graph::Graph(const std::string& gName) {
     else
         isUgraph = false;
 
-    std::vector<std::vector<int>> data;
+    
     loadFile(gName, data);
     vertexNum = getMaxIdx(data) + 1;
     edgeNum = (int)data.size();
@@ -99,6 +99,8 @@ CSR::CSR(const Graph &g) : vertexNum(g.vertexNum), edgeNum(g.edgeNum) {
         rpao[i + 1] = rpao[i] + g.vertices[i]->outDeg;
         rpai[i + 1] = rpai[i] + g.vertices[i]->inDeg;
     }
+    std::cout <<"rpao  "<<rpao[vertexNum] << std::endl;
+    std::cout <<"rpai  "<<rpai[vertexNum] << std::endl;
 
     // sort the input and output vertex
     for (int i = 0; i < vertexNum; i++) {
@@ -111,6 +113,8 @@ CSR::CSR(const Graph &g) : vertexNum(g.vertexNum), edgeNum(g.edgeNum) {
             ciai.push_back(id);
         }
     }
+    std::cout <<"ciai "<<ciai.size() << std::endl;
+    std::cout <<"ciao "<<ciao.size() << std::endl;
 #if 0
     for (int i = 0; i < edgeNum; i++) {
         eProps.push_back(rand() % 10);

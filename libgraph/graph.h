@@ -38,6 +38,7 @@ class Graph{
         int vertexNum;
         int edgeNum;
         std::vector<Vertex*> vertices; 
+        std::vector<std::vector<int>> data;
 
         Graph(const std::string &fName);
         ~Graph(){

@@ -29,6 +29,8 @@ include $(ABS_COMMON_REPO)/utils/opencl.mk
 
 HOST_SRCS = ./host_graph.cpp ./libgraph/graph.cpp ./libgraph/data_helper.cpp
 
+ifeq ($(strip $(GP_SYSTEM)), $(strip $(VAR_TRUE)))
+
 HOST_SRCS += ./libgraph/memory/he_mem.cpp 
 
 HOST_SRCS += ./libgraph/host_graph_sw_mem.cpp
@@ -54,6 +56,8 @@ endif
 
 HOST_SRCS += ./libgraph/verification/host_graph_verification_gs.cpp
 
+endif
+
 # Host compiler global settings
 CXXFLAGS := $(opencl_CXXFLAGS) -Wall
 CXXFLAGS += -I/$(XILINX_SDX)/Vivado_HLS/include/ -O3 -g -fmessage-length=0 -std=c++14 -Wno-deprecated-declarations
@@ -68,7 +72,7 @@ CXXFLAGS += -I $(APPCONFIG)
 # Host linker flags
 LDFLAGS := $(opencl_LDFLAGS)
 LDFLAGS += -lrt -lstdc++  -lxilinxopencl
-
+LDFLAGS += -lgmp -lboost_system -lboost_random
 
 ifeq ($(TARGET),$(filter $(TARGET), hw_emu))
 CLFLAGS = -g -t $(TARGET)
