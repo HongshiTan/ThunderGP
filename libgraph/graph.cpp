@@ -61,12 +61,13 @@ Graph::Graph(const std::string& gName) {
     else
         isUgraph = false;
 
-    
+
     loadFile(gName, data);
     vertexNum = getMaxIdx(data) + 1;
     edgeNum = (int)data.size();
     std::cout << "vertex num: " << vertexNum << std::endl;
     std::cout << "edge num: " << edgeNum << std::endl;
+    std::cout << "isUgraph: " << isUgraph << std::endl;
 
     for (int i = 0; i < vertexNum; i++) {
         Vertex* v = new Vertex(i);
@@ -99,8 +100,8 @@ CSR::CSR(const Graph &g) : vertexNum(g.vertexNum), edgeNum(g.edgeNum) {
         rpao[i + 1] = rpao[i] + g.vertices[i]->outDeg;
         rpai[i + 1] = rpai[i] + g.vertices[i]->inDeg;
     }
-    std::cout <<"rpao  "<<rpao[vertexNum] << std::endl;
-    std::cout <<"rpai  "<<rpai[vertexNum] << std::endl;
+    std::cout << "rpao  " << rpao[vertexNum] << std::endl;
+    std::cout << "rpai  " << rpai[vertexNum] << std::endl;
 
     // sort the input and output vertex
     for (int i = 0; i < vertexNum; i++) {
@@ -113,8 +114,8 @@ CSR::CSR(const Graph &g) : vertexNum(g.vertexNum), edgeNum(g.edgeNum) {
             ciai.push_back(id);
         }
     }
-    std::cout <<"ciai "<<ciai.size() << std::endl;
-    std::cout <<"ciao "<<ciao.size() << std::endl;
+    std::cout << "ciai " << ciai.size() << std::endl;
+    std::cout << "ciao " << ciao.size() << std::endl;
 #if 0
     for (int i = 0; i < edgeNum; i++) {
         eProps.push_back(rand() % 10);
@@ -126,7 +127,7 @@ int CSR::save2File(const std::string &fName)
 {
     std::ostringstream command;
     command << "mkdir -p ";
-    command <<"csr/";
+    command << "csr/";
     command << fName;
     int ret = system(command.str().c_str());
     if (ret < 0)

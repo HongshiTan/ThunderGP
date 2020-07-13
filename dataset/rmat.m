@@ -1,6 +1,6 @@
 clear all
-scale = 19;
-edge_factor = 32;
+scale = 12;
+edge_factor = 16;
 rand ("seed", 103);
 
 ijw = kronecker_generator (scale, edge_factor);
