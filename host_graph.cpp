@@ -48,6 +48,7 @@ typedef struct {
 #define STATUS_FIRST_EDGE       (0)
 #define STATUS_SECOND_EDGE      (1)
 #define STATUS_CLOSE            (2)
+#define STATUS_END              (3)
 
 
 estimator local_estimator[MAX_NUM_ESTIMATOR];
@@ -103,6 +104,7 @@ int main(int argc, char **argv) {
 #endif
 
     DEBUG_PRINTF("start main\n");
+    mt.seed(static_cast<unsigned int>(std::time(0)));
 
     std::cout << std::hex << std::showbase;
     std::cout << (mpz_int(1) << RNG_RANGE_MAX) << std::endl;
@@ -157,99 +159,115 @@ int main(int argc, char **argv) {
                         p_edge->neighbor_counter ++;
                         p_est->neighbor_flag = 0;
                     }
-                    if ((ln == p_edge->node[0]) || (rn == p_edge->node[0]))
+#if 0
+                    else if ((ln == p_edge->node[0]) || (rn == p_edge->node[0]))
                     {
-                        p_est->neighbor_flag = 1;
                         p_edge->neighbor_counter ++;
+                        p_est->neighbor_flag = 1;
                     }
+#endif
                 }
                 int rng = static_cast<int>(ui(mt));
                 p_est->neighbor_id = int((double (rng)) * ratio  * p_edge->neighbor_counter);
-
-
-                switch (p_est->status)
+                while (1)
                 {
-                case STATUS_SECOND_EDGE:
-                {
-
-                    unsigned int local_neighbor_counter = 0;
-                    for (int j = p_edge->id + 1; j < edgeNum; j++)
+                    if(p_est->status== STATUS_END)
+                    {
+                        break;
+                    }
+                    switch (p_est->status)
+                    {
+                    case STATUS_SECOND_EDGE:
                     {
 
-                        int ln =  gptr->data[j][0];
-                        int rn =  gptr->data[j][1];
-                        if ((ln == p_edge->node[1]) || (rn == p_edge->node[1]))
+                        unsigned int local_neighbor_counter = 0;
+                        p_est->status = STATUS_END;
+                        for (int j = p_edge->id + 1; j < edgeNum; j++)
                         {
 
-                            if (local_neighbor_counter == p_est->neighbor_id)
-                                //if (reservoir_sampling(p_edge->neighbor_counter) == 1)
+                            int ln =  gptr->data[j][0];
+                            int rn =  gptr->data[j][1];
+                            if ((ln == p_edge->node[1]) || (rn == p_edge->node[1]))
                             {
 
-                                p_second_edge->id = j;
-                                p_second_edge->node[0] =  (p_edge->node[1] == ln) ? ln : rn;
-                                p_second_edge->node[1] =  (p_edge->node[1] == ln) ? rn : ln;
-                                p_second_edge->p = p_edge->neighbor_counter;
+                                if (local_neighbor_counter == p_est->neighbor_id)
+                                    //if (reservoir_sampling(p_edge->neighbor_counter) == 1)
+                                {
 
-                                p_est->status = STATUS_CLOSE;
-                                break;
+                                    p_second_edge->id = j;
+                                    p_second_edge->node[0] =  (p_edge->node[1] == ln) ? ln : rn;
+                                    p_second_edge->node[1] =  (p_edge->node[1] == ln) ? rn : ln;
+                                    p_second_edge->p = p_edge->neighbor_counter;
+
+                                    p_est->status = STATUS_CLOSE;
+                                    break;
+                                }
+                                local_neighbor_counter ++;
                             }
-                            local_neighbor_counter ++;
-                        }
-                        if ((ln == p_edge->node[0]) || (rn == p_edge->node[0]))
-                        {
-
-                            if (local_neighbor_counter == p_est->neighbor_id)
-                                //if (reservoir_sampling(p_edge->neighbor_counter) == 1)
-                            {
-
-                                p_second_edge->id = j;
-                                p_second_edge->node[0] =  (p_edge->node[0] == ln) ? ln : rn;
-                                p_second_edge->node[1] =  (p_edge->node[0] == ln) ? rn : ln;
-                                p_second_edge->p = p_edge->neighbor_counter;
-
-                                p_est->status = STATUS_CLOSE;
-                                break;
-                            }
-                            local_neighbor_counter ++;
-                        }
-                    }
-                    break;
-                }
-                case STATUS_CLOSE:
-                {
-                    p_est->expecation = 0;
-                    int node =p_edge->node[p_est->neighbor_flag ] ;
-
-                    int degree = csr->rpao[node + 1] - csr->rpao[node];
-
-                    for (int j = csr->rpao[node]; j < csr->rpao[node + 1]; j++)
-                    {
-                        if (csr->ciao[j] == p_second_edge->node[1])
-                        {
-                            success_counter ++;
-                            p_est->expecation = p_edge->p *  p_second_edge->p;
-                            break;
-                        }
-                    }
 #if 0
-                    for (int j = 0; j < edgeNum; j++)
-                    {
-                        int ln =  gptr->data[j][0];
-                        int rn =  gptr->data[j][1];
-                        if ((ln == p_edge->node[0]) && (rn == p_second_edge->node[1]))
+                            else if ((ln == p_edge->node[0]) || (rn == p_edge->node[0]))
+                            {
 
-                        {
-                            success_counter ++;
-                            p_est->expecation = p_edge->p *  p_second_edge->p;
-                            break;
-                        }
-                    }
+                                if (local_neighbor_counter == p_est->neighbor_id)
+                                    //if (reservoir_sampling(p_edge->neighbor_counter) == 1)
+                                {
+
+                                    p_second_edge->id = j;
+                                    p_second_edge->node[0] =  (p_edge->node[0] == ln) ? ln : rn;
+                                    p_second_edge->node[1] =  (p_edge->node[0] == ln) ? rn : ln;
+                                    p_second_edge->p = p_edge->neighbor_counter;
+
+                                    p_est->status = STATUS_CLOSE;
+                                    break;
+                                }
+                                local_neighbor_counter ++;
+                            }
 #endif
-                    break;
+                        }
+                        break;
+                    }
+                    case STATUS_CLOSE:
+                    {
+
+
+                        p_est->expecation = 0;
+#if 1
+                        int node = p_edge->node[p_est->neighbor_flag ] ;
+                        //printf("node %d -> %d\n", node, p_second_edge->node[1]);
+
+                        for (int j = csr->rpao[node]; j < csr->rpao[node + 1]; j++)
+                        {
+                            //printf("%d\n", csr->ciao[j]);
+                            if (csr->ciao[j] == p_second_edge->node[1])
+                            {
+                                success_counter ++;
+                                p_est->expecation = p_edge->p *  p_second_edge->p;
+                                break;
+                            }
+                        }
+                       
+#else
+                        for (int j = p_second_edge->id + 1; j < edgeNum; j++)
+                        {
+                            int ln =  gptr->data[j][0];
+                            int rn =  gptr->data[j][1];
+                            if (((ln == p_edge->node[p_est->neighbor_flag]) && (rn == p_second_edge->node[1])) ||
+                                ((rn == p_edge->node[p_est->neighbor_flag]) && (ln == p_second_edge->node[1])))
+
+                            {
+                                success_counter ++;
+                                p_est->expecation = p_edge->p *  p_second_edge->p;
+                                break;
+                            }
+                        }
+#endif
+                        p_est->status = STATUS_END;
+                        break;
+
+                    }
+                    }
 
                 }
-                }
-
             }
             double result = 0;
             unsigned int  failed_counter = 0;
@@ -259,15 +277,17 @@ int main(int argc, char **argv) {
                 estimator * p_est    = &local_estimator[i];
                 sample_edge * p_edge    = &p_est->first_edge;
                 sample_edge * p_second_edge = &p_est->second_edge;
+#if 0
                 DEBUG_PRINTF("id %d nc %d %d status %d [%d %d] [%d %d]\n",
                              p_edge->id,
                              p_edge->neighbor_counter,
                              p_est->neighbor_id,
-                             p_est->status,
+                             p_second_edge->id,
                              p_edge->node[0],
                              p_edge->node[1],
                              p_second_edge->node[0],
                              p_second_edge->node[1]);
+#endif
                 result     += p_est->expecation;
             }
             DEBUG_PRINTF("result %lf @ %d with %d,total %d \n", (double(result) / est_num),
