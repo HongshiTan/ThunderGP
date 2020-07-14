@@ -18,8 +18,7 @@ using namespace boost::random;
 
 #define RNG_RANGE_MAX           (30)
 
-mt19937 mt;
-uniform_int_distribution<mpz_int> ui(0, mpz_int(1) << RNG_RANGE_MAX);
+
 //
 // Generate the numbers:
 //
@@ -69,16 +68,17 @@ thread_item   threads[MAX_NUN_THREADS];
 
 estimator local_estimator[MAX_NUM_ESTIMATOR];
 
+uniform_int_distribution<mpz_int> ui(0, mpz_int(1) << RNG_RANGE_MAX);
 
 const double ratio = 1.0 / (double(1 << RNG_RANGE_MAX));
 
+typedef mt11213b  prng;
 
-int reservoir_sampling(int n, mt19937 &lmt)
+int reservoir_sampling(int n, prng &lmt)
 {
-    int rn = static_cast<int>(ui(lmt));
-    float p = float(rn) * ratio;
-    float p0 = 1.0f / (n);
-    if (p < p0)
+    bernoulli_distribution<double> p(1.0 / (n));
+    bool res = p(lmt);
+    if (res)
     {
         return 1;
     }
@@ -89,7 +89,7 @@ int reservoir_sampling(int n, mt19937 &lmt)
 
 int approximation(estimator *p_est, Graph* gptr, CSR* csr)
 {
-    mt19937 mt;
+    prng mt;
     mt.seed(static_cast<unsigned int>(std::time(0)) + (unsigned long)(p_est));
     memset(p_est, 0, sizeof(estimator));
     int edgeNum   = csr ->edgeNum;
@@ -100,12 +100,13 @@ int approximation(estimator *p_est, Graph* gptr, CSR* csr)
 
     for (int i = 0; i < edgeNum; i++)
     {
-        if (reservoir_sampling(i, mt))
+        if (reservoir_sampling(i + 1, mt) )
         {
             p_est->first_edge.node[0] = gptr->data[i][0];
             p_est->first_edge.node[1] = gptr->data[i][1];
             p_first->update_counter ++;
             p_est->neighbor_counter = 0;
+            p_est->status = 1;
         }
         else
         {
@@ -114,17 +115,20 @@ int approximation(estimator *p_est, Graph* gptr, CSR* csr)
 
 
             int adjacent_flag = 0;
+#if 0
             if ((ln == p_first->node[0]) || (rn == p_first->node[0]))
             {
                 p_est->neighbor_flag = 1;
                 adjacent_flag = 1;
             }
-            else if ((ln == p_first->node[1]) || (rn == p_first->node[1]))
+#endif
+#if 1
+            if ((ln == p_first->node[1]) || (rn == p_first->node[1]))
             {
                 p_est->neighbor_flag = 0;
                 adjacent_flag = 1;
             }
-
+#endif
             if (adjacent_flag == 1)
             {
                 p_est->neighbor_counter ++;
@@ -133,18 +137,36 @@ int approximation(estimator *p_est, Graph* gptr, CSR* csr)
                     p_second->node[0] =  (p_first->node[1] == ln) ? ln : rn;
                     p_second->node[1] =  (p_first->node[1] == ln) ? rn : ln;
                     p_second->update_counter ++;
+                    p_est->status = 2;
                 }
-                else
+
+                if (p_est->status == 2)
                 {
+#if 1
+                    int node = p_first->node[p_est->neighbor_flag ] ;
+                    //printf("node %d -> %d\n", node, p_second_edge->node[1]);
+
+                    for (int j = csr->rpao[node]; j < csr->rpao[node + 1]; j++)
+                    {
+                        //printf("%d\n", csr->ciao[j]);
+                        if (csr->ciao[j] == p_second->node[1])
+                        {
+                            p_est->expecation = p_est->neighbor_counter * i;
+                            p_est->status = 3;
+                            break;
+                        }
+                    }
+#else
                     if (((ln == p_first->node[p_est->neighbor_flag]) && (rn == p_second->node[1]))
                             || ((rn == p_first->node[p_est->neighbor_flag]) && (ln == p_second->node[1])))
 
                     {
 
-                        p_est->expecation = p_est->neighbor_counter ;
-                        p_est->status = 1;
+                        p_est->expecation = p_est->neighbor_counter  * i;
+                        p_est->status = 3;
                         return 1;
                     }
+#endif
                 }
 
             }
@@ -192,7 +214,6 @@ int main(int argc, char **argv) {
 #endif
 
     DEBUG_PRINTF("start main\n");
-    mt.seed(static_cast<unsigned int>(std::time(0)));
 
     std::cout << std::hex << std::showbase;
     std::cout << (mpz_int(1) << RNG_RANGE_MAX) << std::endl;
@@ -237,12 +258,15 @@ int main(int argc, char **argv) {
                 {
                     pthread_join(threads[j].pid, NULL);
                     threads[j].expecation += local_estimator[j].expecation;
-                    threads[j].counter += local_estimator[j].status;
+                    if (local_estimator[j].status == 3)
+                    {
+                        threads[j].counter++;
+                    }
                     threads[j].run ++;
                     estimator * p_est    = &local_estimator[j];
                     sample_edge * p_first     = &p_est->first_edge;
                     sample_edge * p_second = &p_est->second_edge;
-
+#if 0
                     DEBUG_PRINTF("%d nc %d (%d %d) [%d %d] [%d %d]\n",
                                  p_est->status ,
                                  p_est->neighbor_counter,
@@ -252,7 +276,7 @@ int main(int argc, char **argv) {
                                  p_first->node[1],
                                  p_second->node[0],
                                  p_second->node[1]);
-
+#endif
                 }
 
                 //estimator * p_est    = &local_estimator[i];
@@ -291,7 +315,7 @@ int main(int argc, char **argv) {
                 result     += p_est->expecation;
             }
 #endif
-            DEBUG_PRINTF("result %lf @ %d with %d,total %d \n", (double(result * edgeNum) / total_est_num),
+            DEBUG_PRINTF("result %lf @ %d with %d,total %d \n", (double(result ) / total_est_num),
                          repeat, total_est_num,
                          success_counter);
         }
