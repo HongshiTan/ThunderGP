@@ -12,6 +12,43 @@ Finished reading datagraph: |V| = 317080 |E| = 1049866
 [2-3][1-2][1-3]: 2224385
 
 
-Amazon 335K 926K 549                  667,129      761.9
+DBLP
+test
+No label file
+Finished reading datagraph: |V| = 317080 |E| = 1049866
+[2-3][1-3](1~2) finished after 0.016332s
+[2-3][1-2][1-3] finished after 0.070406s
+-------
+all patterns finished after 0.086939s
+[2-3][1-3](1~2): 1510 7734
+[2-3][1-2][1-3]: 2224385
 DBLP 317K 1.0M 343                  2,224,385      161.9
+
+17332119
+
+Amazon
+test
+No label file
+Finished reading datagraph: |V| = 334863 |E| = 925872
+[2-3][1-3](1~2) finished after 0.017198s
+[2-3][1-2][1-3] finished after 0.058488s
+-------
+all patterns finished after 0.075879s
+[2-3][1-3](1~2): 775 0799
+[2-3][1-2][1-3]: 667129
+
+8417928
+
+Amazon 335K 926K 549                  667,129      761.9
+
+Youtube
+test
+No label file
+Finished reading datagraph: |V| = 1134890 |E| = 2987624
+[2-3][1-3](1~2) finished after 0.054868s
+[2-3][1-2][1-3] finished after 0.518434s
+-------
+all patterns finished after 0.573487s
+[2-3][1-3](1~2): 14 6531 3402
+[2-3][1-2][1-3]: 3056386
 Youtube 1.13M 3.0M 28,754           3,056,386   28,107.1
