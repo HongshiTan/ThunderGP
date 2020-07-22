@@ -27,7 +27,10 @@ include $(ABS_COMMON_REPO)/utils/opencl.mk
 #--xp prop:solution.kernel_compiler_margin=<Frequency Percentage>
 #--xp param:compiler.enableAutoFrequencyScaling=0
 
-HOST_SRCS = ./host_graph.cpp ./libgraph/graph.cpp ./libgraph/data_helper.cpp
+HOST_SRCS = ./host_graph.cpp  ./libgraph/graph.cpp ./libgraph/data_helper.cpp
+
+
+HOST_SRCS += motifs.cpp triangle.cpp
 
 ifeq ($(strip $(GP_SYSTEM)), $(strip $(VAR_TRUE)))
 
