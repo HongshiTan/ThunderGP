@@ -43,7 +43,8 @@ object MotifCounting extends Logging{
 
     val options = mutable.Map(optionsList: _*)
 
-    val conf = new SparkConf()
+    // val conf = new SparkConf()
+    val conf = new SparkConf().setMaster("local[1]")
     GraphXUtils.registerKryoClasses(conf)
 
 
