@@ -124,30 +124,29 @@ object TriangleCounting extends Logging{
 
               if(srcVal == null){
                 degMap.put(src,1)
-                }else
-                {
-                  degMap.put(src,srcVal+1)
-                }
+              }else
+              {
+                degMap.put(src,srcVal+1)
+              }
 
               if(directed == 0){
                 if(dstVal == null){
                   degMap.put(dst,1)
                 }else
-                  {
+                {
                   degMap.put(dst,dstVal+1)
-                  }
+                }
               }
-
-                  val tmpbuf = ltable.get(edge)
-                  if(tmpbuf!=null){
-                    for( estimator <- tmpbuf) {
-                      if(directed == 0){
-                        betax(estimator) = degMap.get(src)
-                      }
-                      betay(estimator) = degMap.get(dst)
-                    }           
+              val tmpbuf = ltable.get(edge)
+              if(tmpbuf!=null){
+                for( estimator <- tmpbuf) {
+                  if(directed == 0){
+                    betax(estimator) = degMap.get(src)
                   }
-                  })
+                  betay(estimator) = degMap.get(dst)
+                }
+              }
+              })
 
           //step 2
           for( i <- 0 to (r-1)) {
@@ -159,26 +158,25 @@ object TriangleCounting extends Logging{
               if(directed == 0){
                 c(i) = (a + b)
                 if(c(i)>0){
-                val alpha = 1+ran.nextInt(c(i))
-
-                if(alpha <= a){
-                  val tmpDeg = betax(i)+alpha
-                  val tmpbuf = ptable.get((src,tmpDeg))
-                  if(tmpbuf == null){
-                    ptable.put((src,tmpDeg),Array(i))
+                  val alpha = 1+ran.nextInt(c(i))
+                  if(alpha <= a){
+                    val tmpDeg = betax(i)+alpha
+                    val tmpbuf = ptable.get((src,tmpDeg))
+                    if(tmpbuf == null){
+                      ptable.put((src,tmpDeg),Array(i))
                     }else{
                       ptable.put((src,tmpDeg),tmpbuf :+ i)
                     }
+                  }else{
+                    val tmpDeg = betax(i)+alpha-a
+                    val tmpbuf = ptable.get((dst,tmpDeg))
+                    if(tmpbuf == null){
+                      ptable.put((dst,tmpDeg),Array(i))
                     }else{
-                      val tmpDeg = betax(i)+alpha-a
-                      val tmpbuf = ptable.get((dst,tmpDeg))
-                      if(tmpbuf == null){
-                        ptable.put((dst,tmpDeg),Array(i))
-                        }else{
-                          ptable.put((dst,tmpDeg),tmpbuf :+ i)
-                        }
-                      }              
+                      ptable.put((dst,tmpDeg),tmpbuf :+ i)
                     }
+                  }
+                }
               }else{
                 c(i) = b
                 if(c(i)>0){
@@ -187,72 +185,61 @@ object TriangleCounting extends Logging{
                   val tmpbuf = ptable.get((dst,tmpDeg))
                   if(tmpbuf == null){
                       ptable.put((dst,tmpDeg),Array(i))
-                        }else{
+                  }else{
                       ptable.put((dst,tmpDeg),tmpbuf :+ i)
-                        }
+                  }
                 }
               }
-                  } 
-                }
+            } 
+          }
+          degMap.clear()
+          for( k <- 0 to (w-1) ) {
+            val src = edgeList(k).srcId
+            val dst = edgeList(k).dstId
+            val srcVal = degMap.get(src)
+            val dstVal = degMap.get(dst)
 
-                degMap.clear()
-
-                for( k <- 0 to (w-1) ) {
-                  val src = edgeList(k).srcId
-                  val dst = edgeList(k).dstId
-                  val srcVal = degMap.get(src)
-                  val dstVal = degMap.get(dst)
-
-                  if(srcVal == null){
-                    degMap.put(src,1)
-                    }else
-                    {
-                      degMap.put(src,srcVal+1)
+            if(srcVal == null){
+              degMap.put(src,1)
+            }else
+            {
+              degMap.put(src,srcVal+1)
+            }
+            if(directed == 0){
+              if(dstVal == null){
+                degMap.put(dst,1)
+              }else
+              {
+                degMap.put(dst,dstVal+1)
+              }
+            }
+            val tmpbufx = ptable.get((src,degMap.get(src)))
+            val tmpbufy = ptable.get((dst,degMap.get(dst)))
+                if(directed == 0){
+                  if(tmpbufx != null){
+                    for(estimator <- tmpbufx) {
+                      r2(estimator) = edgeList(k)
+                      locs(estimator) = src
+                      r2locs(estimator) = k
                     }
-                    if(directed == 0){
-                      if(dstVal == null){
-                        degMap.put(dst,1)
-                        }else
-                        {
-                          degMap.put(dst,dstVal+1)
-                        }
-                      }
+                  }else if(tmpbufy != null){
+                    for(estimator <- tmpbufy) {
+                      r2(estimator) = edgeList(k)
+                      locs(estimator) = dst
+                      r2locs(estimator) = k
+                    }
+                  }
+                }else{
+                  if(tmpbufx != null){
+                    for(estimator <- tmpbufx) {
 
-
-                      val tmpbufx = ptable.get((src,degMap.get(src)))
-                      val tmpbufy = ptable.get((dst,degMap.get(dst)))
-                      if(directed == 0){
-                        if(tmpbufx != null){
-
-                        for(estimator <- tmpbufx) {
-
-                          r2(estimator) = edgeList(k)
-                          locs(estimator) = src
-                          r2locs(estimator) = k
-                        }
-                        }else if(tmpbufy != null){
-
-                          for(estimator <- tmpbufy) {
-
-                            r2(estimator) = edgeList(k)
-                            locs(estimator) = dst
-                            r2locs(estimator) = k
-                          }
-                        }
-                      }else{
-                        if(tmpbufx != null){
-                          for(estimator <- tmpbufx) {
-
-                          r2(estimator) = edgeList(k)
-                          //locs(estimator) = src
-                          r2locs(estimator) = k
-                        }
-                        }
-
-                      }
-
-
-                      }
+                      r2(estimator) = edgeList(k)
+                      //locs(estimator) = src
+                      r2locs(estimator) = k
+                    }
+                  }
+                }
+              }
 
             //step 3
             for( i <- 0 to (r-1)) {
