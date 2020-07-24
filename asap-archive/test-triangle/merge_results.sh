@@ -1,7 +1,7 @@
 #!/bin/bash
 
 GRAPH_NAME=$1
-YYYYMMDD=$(date '+%Y%m%d')
+YYYYMMDD=$2
 
 MERGED_FILE=output/${YYYYMMDD}_triangle_${GRAPH_NAME}_merged.txt
 cat output/${YYYYMMDD}_triangle_${GRAPH_NAME}_1.txt | awk -F ' ' '{print $1}' > $MERGED_FILE

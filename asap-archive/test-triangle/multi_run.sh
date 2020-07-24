@@ -3,7 +3,7 @@
 
 GRAPH_PATH=$1
 GRAPH_NAME=$(cut -d'/' -f3 <<< ${GRAPH_PATH} | cut -d'.' -f1)
-YYMMDD=$(date '+%Y%m%d')
+YYYYMMDD=$(date '+%Y%m%d')
 LOGFILE=triangle.log
 OUTPUTFILE=output_triangle.txt
 
@@ -20,8 +20,8 @@ do
   fi
   echo "Iteration " $RUN_ID
   ./run.sh $GRAPH_PATH
-  mv $LOGFILE log/${YYMMDD}_triangle_${GRAPH_NAME}_${RUN_ID}.log
-  mv $OUTPUTFILE output/${YYMMDD}_triangle_${GRAPH_NAME}_${RUN_ID}.txt
+  mv $LOGFILE log/${YYYYMMDD}_triangle_${GRAPH_NAME}_${RUN_ID}.log
+  mv $OUTPUTFILE output/${YYYYMMDD}_triangle_${GRAPH_NAME}_${RUN_ID}.txt
 done
 
-./merge_results.sh $GRAPH_NAME
+./merge_results.sh $GRAPH_NAME $YYYYMMDD
