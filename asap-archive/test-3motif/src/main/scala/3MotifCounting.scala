@@ -44,7 +44,10 @@ object MotifCounting extends Logging{
     val options = mutable.Map(optionsList: _*)
 
     // val conf = new SparkConf()
-    val conf = new SparkConf().setMaster("local[1]")
+    val conf = new SparkConf().setMaster("local[1]")\
+                               .set("spark.executor.heartbeatInterval", "2000000") \
+                               .set("spark.network.timeout", "3000000")
+
     GraphXUtils.registerKryoClasses(conf)
 
 
