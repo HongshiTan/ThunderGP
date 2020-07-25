@@ -44,12 +44,12 @@ object MotifCounting extends Logging{
     val options = mutable.Map(optionsList: _*)
 
     // val conf = new SparkConf()
-    val conf = new SparkConf().setMaster("local[1]")\
-                               .set("spark.executor.heartbeatInterval", "2000000") \
-                               .set("spark.network.timeout", "3000000")
-
-    GraphXUtils.registerKryoClasses(conf)
-
+    val conf = new SparkConf()
+        conf.setMaster("local[1]")
+        conf.set("spark.executor.heartbeatInterval", "2000000")
+        conf.set("spark.network.timeout", "3000000")
+        conf.set("spark.kryo.referenceTracking","false")
+        conf.set("spark.driver.memory","300g")
 
     val numEPart = options.remove("numEPart").map(_.toInt).getOrElse {
       println("Set the number of edge partitions using --numEPart.")
@@ -59,23 +59,23 @@ object MotifCounting extends Logging{
     val partitionStrategy: Option[PartitionStrategy] = options.remove("partStrategy")
     .map(PartitionStrategy.fromString(_))
     val edgeStorageLevel = options.remove("edgeStorageLevel")
-    .map(StorageLevel.fromString(_)).getOrElse(StorageLevel.MEMORY_ONLY)
+    .map(StorageLevel.fromString(_)).getOrElse(StorageLevel.MEMORY_AND_DISK_SER)
     val vertexStorageLevel = options.remove("vertexStorageLevel")
-    .map(StorageLevel.fromString(_)).getOrElse(StorageLevel.MEMORY_ONLY)
+    .map(StorageLevel.fromString(_)).getOrElse(StorageLevel.MEMORY_AND_DISK_SER)
 
     val sc = new SparkContext(conf.setAppName("MotifCount(" + fname + ")"))
+    sc.hadoopConfiguration.set("mapred.min.split.size", " 536870912")
+    sc.hadoopConfiguration.set("mapred.max.split.size", " 536870912")
     val graph = GraphLoader.edgeListFile(sc, fname,
       canonicalOrientation = true,
       numEdgePartitions = numEPart,
       edgeStorageLevel = edgeStorageLevel,
       vertexStorageLevel = vertexStorageLevel)
           // TriangleCount requires the graph to be partitioned
-          .partitionBy(partitionStrategy.getOrElse(RandomVertexCut)).cache()
-
+          .partitionBy(partitionStrategy.getOrElse(RandomVertexCut))//.cache()
     // val n = graph.vertices.count().toInt // # of vertices
     // val m = graph.edges.count().toInt // # of edges
     // println("########### Edges "+ m + "; ######## vertices " + n)
-
 
     val startTime = System.currentTimeMillis
     val parTriangle = graph.edges.mapPartitions{
