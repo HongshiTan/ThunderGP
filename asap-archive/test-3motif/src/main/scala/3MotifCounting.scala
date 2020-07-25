@@ -67,7 +67,7 @@ object MotifCounting extends Logging{
       edgeStorageLevel = edgeStorageLevel,
       vertexStorageLevel = vertexStorageLevel)
           // TriangleCount requires the graph to be partitioned
-          .partitionBy(partitionStrategy.getOrElse(RandomVertexCut))//.cache()
+          .partitionBy(partitionStrategy.getOrElse(RandomVertexCut)).cache()
 
     // val n = graph.vertices.count().toInt // # of vertices
     // val m = graph.edges.count().toInt // # of edges
