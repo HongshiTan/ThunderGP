@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
                            100000, 200000, 500000, 1000 * 1000,
                            1000 * 1000 * 2, 1000 * 1000 * 5
                          };
-#if 1
+#if 0
     const int total_k = ARRAY_SIZE(est_num_map) - 3;
     for (int k = 0; k < total_k ; k ++)
     {

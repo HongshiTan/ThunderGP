@@ -28,6 +28,8 @@ typedef struct {
     double expecation;
     sample_edge first_edge;
     sample_edge second_edge;
+    unsigned int tmp_neighbor_counter;
+    unsigned int tmp_rng;
     unsigned int neighbor_counter;
     unsigned int neighbor_id;
     unsigned char neighbor_flag;

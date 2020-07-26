@@ -52,3 +52,10 @@ all patterns finished after 0.573487s
 [2-3][1-3](1~2): 14 6531 3402
 [2-3][1-2][1-3]: 3056386
 Youtube 1.13M 3.0M 28,754           3,056,386   28,107.1
+
+
+
+
+citeseer	 23380 1166
+youtube.ungraph	 1465313402 3056386
+LiveJournal	 3722307805 177820130
