@@ -16,9 +16,9 @@
 // Generate the numbers:
 //
 
-#define STRINGIFY_MACRO(x)          
+#define STRINGIFY_MACRO(x)              STR(x)
 #define STR(x)                          #x
-#define STR_APPROXIMATE_FUNCTION        STR(APPROXIMATE_FUNCTION)
+#define STR_APPROXIMATE_FUNCTION        STRINGIFY_MACRO(APPROXIMATE_FUNCTION)
 
 
 

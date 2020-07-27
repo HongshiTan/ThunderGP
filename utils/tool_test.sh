@@ -13,11 +13,11 @@ test() {
 
 }
 
-test /graph_data/citeseer.txt citeseer 1
-test /graph_data/citeseer.txt citeseer 2
-test /graph_data/citeseer.txt citeseer 3
-test /graph_data/citeseer.txt citeseer 4
-test /graph_data/citeseer.txt citeseer 5
+#test /graph_data/citeseer.txt citeseer 1
+#test /graph_data/citeseer.txt citeseer 2
+#test /graph_data/citeseer.txt citeseer 3
+#test /graph_data/citeseer.txt citeseer 4
+#test /graph_data/citeseer.txt citeseer 5
 
  
 #test /graph_data/youtube.ungraph.txt  youtube 1
@@ -26,8 +26,8 @@ test /graph_data/citeseer.txt citeseer 5
 #test /graph_data/youtube.ungraph.txt  youtube 4
 #test /graph_data/youtube.ungraph.txt  youtube 5
 
-#test /graph_data/LiveJournal.txt  livejournal 1
-#test /graph_data/LiveJournal.txt  livejournal 2
-#test /graph_data/LiveJournal.txt  livejournal 3
-#test /graph_data/LiveJournal.txt  livejournal 4
-#test /graph_data/LiveJournal.txt  livejournal 5
+test /graph_data/LiveJournal.txt  livejournal 1
+test /graph_data/LiveJournal.txt  livejournal 2
+test /graph_data/LiveJournal.txt  livejournal 3
+test /graph_data/LiveJournal.txt  livejournal 4
+test /graph_data/LiveJournal.txt  livejournal 5
