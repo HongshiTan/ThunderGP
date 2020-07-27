@@ -181,9 +181,9 @@ object MotifCounting extends Logging{
     
 		        val pw = new PrintWriter(new FileOutputStream(new File("output3Motif.txt"),true))
 		        pw.println(r+"  "+totalTriangle+"  "+totalTime.toDouble/1000.0+" "+numEPart)
+			pw.close
+		    }
+		    sc.stop()
 	          }
 	        }
-    }
-    pw.close
-    sc.stop()
 // scalastyle:on println

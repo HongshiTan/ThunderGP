@@ -345,12 +345,10 @@ object TriangleCounting extends Logging{
                 // pw.write("Triangles:"+totalTriangle+" Time:"+totalTime.toDouble/1000.0)
                 val pw = new PrintWriter(new FileOutputStream(new File("output_triangle.txt"),true))
 	        pw.println(r+"  "+totalTriangle+"  "+totalTime.toDouble/1000.0+" "+numEPart)
-	        //pw.close
+	        pw.close
                 //sc.stop()
-  
-              }
+  	      }
+	      sc.stop()
             }
-    }
-    pw.close
-    sc.stop()
+          }
 // scalastyle:on println
