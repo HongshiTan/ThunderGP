@@ -75,277 +75,282 @@ object TriangleCounting extends Logging{
     
     //val accum = sc.accumulator(0)//sum accum
 
-    val startTime = System.currentTimeMillis
-    val parTriangle = canonicalGraph.edges.mapPartitions{
-           iterator => {
-          //var deg = new Array[Int](n+1)//deg map for bulk vertices
-          var degMap = new java.util.HashMap[VertexId, Int]()
-          var ptable = new java.util.HashMap[(VertexId,Int), Array[Int]]()
-          var ltable = new java.util.HashMap[Edge[Int], Array[Int]]()
-          var qtable = new java.util.HashMap[(VertexId,VertexId), Array[Int]]()
-          var r1 = new Array[Edge[Int]](r)
-          var r2 = new Array[Edge[Int]](r)
-          var r2locs = new Array[Int](r)
-          var betax = new Array[Int](r)
-          var betay = new Array[Int](r)
-          var c = new Array[Int](r)
-          var close = new Array[Boolean](r)
-          var locs = new Array[VertexId](r)
-
-
-          val edgeList = iterator.toArray
-          val w = edgeList.size
-          val ran = scala.util.Random
-
-          //Count type1 triangles for directed graph
-          // if(directed != 0){
-            
-
-          // }
-          // Step 1
-          for( i <- 0 to (r-1)) {
-            val loc = ran.nextInt(w)
-            r1(i) = edgeList(loc)
-            //c(i) = 0
-            val tmpbuf = ltable.get(r1(i))
-            if(tmpbuf == null){
-              ltable.put(r1(i),Array(i))
-              }else{
-                ltable.put(r1(i),tmpbuf :+ i)
-              }
-            }
-
-            edgeList.map(edge => {
-              val src = edge.srcId
-              val dst = edge.dstId
-
-              val srcVal = degMap.get(src)
-              val dstVal = degMap.get(dst)
-
-              if(srcVal == null){
-                degMap.put(src,1)
-                }else
-                {
-                  degMap.put(src,srcVal+1)
+    val numEstimators = Vector(100, 200, 500, 1000, 2000, 5000, 10000)
+    for (r <- numEstimators) {
+      val startTime = System.currentTimeMillis
+      val parTriangle = canonicalGraph.edges.mapPartitions{
+             iterator => {
+            //var deg = new Array[Int](n+1)//deg map for bulk vertices
+            var degMap = new java.util.HashMap[VertexId, Int]()
+            var ptable = new java.util.HashMap[(VertexId,Int), Array[Int]]()
+            var ltable = new java.util.HashMap[Edge[Int], Array[Int]]()
+            var qtable = new java.util.HashMap[(VertexId,VertexId), Array[Int]]()
+            var r1 = new Array[Edge[Int]](r)
+            var r2 = new Array[Edge[Int]](r)
+            var r2locs = new Array[Int](r)
+            var betax = new Array[Int](r)
+            var betay = new Array[Int](r)
+            var c = new Array[Int](r)
+            var close = new Array[Boolean](r)
+            var locs = new Array[VertexId](r)
+  
+  
+            val edgeList = iterator.toArray
+            val w = edgeList.size
+            val ran = scala.util.Random
+  
+            //Count type1 triangles for directed graph
+            // if(directed != 0){
+              
+  
+            // }
+            // Step 1
+            for( i <- 0 to (r-1)) {
+              val loc = ran.nextInt(w)
+              r1(i) = edgeList(loc)
+              //c(i) = 0
+              val tmpbuf = ltable.get(r1(i))
+              if(tmpbuf == null){
+                ltable.put(r1(i),Array(i))
+                }else{
+                  ltable.put(r1(i),tmpbuf :+ i)
                 }
-
-              if(directed == 0){
-                if(dstVal == null){
-                  degMap.put(dst,1)
-                }else
+              }
+  
+              edgeList.map(edge => {
+                val src = edge.srcId
+                val dst = edge.dstId
+  
+                val srcVal = degMap.get(src)
+                val dstVal = degMap.get(dst)
+  
+                if(srcVal == null){
+                  degMap.put(src,1)
+                  }else
                   {
-                  degMap.put(dst,dstVal+1)
+                    degMap.put(src,srcVal+1)
                   }
-              }
-
-                  val tmpbuf = ltable.get(edge)
-                  if(tmpbuf!=null){
-                    for( estimator <- tmpbuf) {
-                      if(directed == 0){
-                        betax(estimator) = degMap.get(src)
-                      }
-                      betay(estimator) = degMap.get(dst)
-                    }           
-                  }
-                  })
-
-          //step 2
-          for( i <- 0 to (r-1)) {
-            if(r1(i)!=null){
-              val src = r1(i).srcId
-              val dst = r1(i).dstId
-              val a = degMap.get(src) - betax(i)
-              val b = degMap.get(dst) - betay(i)
-              if(directed == 0){
-                c(i) = (a + b)
-                if(c(i)>0){
-                val alpha = 1+ran.nextInt(c(i))
-
-                if(alpha <= a){
-                  val tmpDeg = betax(i)+alpha
-                  val tmpbuf = ptable.get((src,tmpDeg))
-                  if(tmpbuf == null){
-                    ptable.put((src,tmpDeg),Array(i))
-                    }else{
-                      ptable.put((src,tmpDeg),tmpbuf :+ i)
-                    }
-                    }else{
-                      val tmpDeg = betax(i)+alpha-a
-                      val tmpbuf = ptable.get((dst,tmpDeg))
-                      if(tmpbuf == null){
-                        ptable.put((dst,tmpDeg),Array(i))
-                        }else{
-                          ptable.put((dst,tmpDeg),tmpbuf :+ i)
-                        }
-                      }              
-                    }
-              }else{
-                c(i) = b
-                if(c(i)>0){
-                  val alpha = 1+ran.nextInt(c(i))
-                  val tmpDeg = betay(i)+alpha
-                  val tmpbuf = ptable.get((dst,tmpDeg))
-                  if(tmpbuf == null){
-                      ptable.put((dst,tmpDeg),Array(i))
-                        }else{
-                      ptable.put((dst,tmpDeg),tmpbuf :+ i)
-                        }
-                }
-              }
-                  } 
-                }
-
-                degMap.clear()
-
-                for( k <- 0 to (w-1) ) {
-                  val src = edgeList(k).srcId
-                  val dst = edgeList(k).dstId
-                  val srcVal = degMap.get(src)
-                  val dstVal = degMap.get(dst)
-
-                  if(srcVal == null){
-                    degMap.put(src,1)
-                    }else
+  
+                if(directed == 0){
+                  if(dstVal == null){
+                    degMap.put(dst,1)
+                  }else
                     {
-                      degMap.put(src,srcVal+1)
+                    degMap.put(dst,dstVal+1)
                     }
-                    if(directed == 0){
-                      if(dstVal == null){
-                        degMap.put(dst,1)
-                        }else
-                        {
-                          degMap.put(dst,dstVal+1)
+                }
+  
+                    val tmpbuf = ltable.get(edge)
+                    if(tmpbuf!=null){
+                      for( estimator <- tmpbuf) {
+                        if(directed == 0){
+                          betax(estimator) = degMap.get(src)
                         }
+                        betay(estimator) = degMap.get(dst)
+                      }           
+                    }
+                    })
+  
+            //step 2
+            for( i <- 0 to (r-1)) {
+              if(r1(i)!=null){
+                val src = r1(i).srcId
+                val dst = r1(i).dstId
+                val a = degMap.get(src) - betax(i)
+                val b = degMap.get(dst) - betay(i)
+                if(directed == 0){
+                  c(i) = (a + b)
+                  if(c(i)>0){
+                  val alpha = 1+ran.nextInt(c(i))
+  
+                  if(alpha <= a){
+                    val tmpDeg = betax(i)+alpha
+                    val tmpbuf = ptable.get((src,tmpDeg))
+                    if(tmpbuf == null){
+                      ptable.put((src,tmpDeg),Array(i))
+                      }else{
+                        ptable.put((src,tmpDeg),tmpbuf :+ i)
                       }
-
-
-                      val tmpbufx = ptable.get((src,degMap.get(src)))
-                      val tmpbufy = ptable.get((dst,degMap.get(dst)))
+                      }else{
+                        val tmpDeg = betax(i)+alpha-a
+                        val tmpbuf = ptable.get((dst,tmpDeg))
+                        if(tmpbuf == null){
+                          ptable.put((dst,tmpDeg),Array(i))
+                          }else{
+                            ptable.put((dst,tmpDeg),tmpbuf :+ i)
+                          }
+                        }              
+                      }
+                }else{
+                  c(i) = b
+                  if(c(i)>0){
+                    val alpha = 1+ran.nextInt(c(i))
+                    val tmpDeg = betay(i)+alpha
+                    val tmpbuf = ptable.get((dst,tmpDeg))
+                    if(tmpbuf == null){
+                        ptable.put((dst,tmpDeg),Array(i))
+                          }else{
+                        ptable.put((dst,tmpDeg),tmpbuf :+ i)
+                          }
+                  }
+                }
+                    } 
+                  }
+  
+                  degMap.clear()
+  
+                  for( k <- 0 to (w-1) ) {
+                    val src = edgeList(k).srcId
+                    val dst = edgeList(k).dstId
+                    val srcVal = degMap.get(src)
+                    val dstVal = degMap.get(dst)
+  
+                    if(srcVal == null){
+                      degMap.put(src,1)
+                      }else
+                      {
+                        degMap.put(src,srcVal+1)
+                      }
                       if(directed == 0){
-                        if(tmpbufx != null){
-
-                        for(estimator <- tmpbufx) {
-
-                          r2(estimator) = edgeList(k)
-                          locs(estimator) = src
-                          r2locs(estimator) = k
-                        }
-                        }else if(tmpbufy != null){
-
-                          for(estimator <- tmpbufy) {
-
-                            r2(estimator) = edgeList(k)
-                            locs(estimator) = dst
-                            r2locs(estimator) = k
+                        if(dstVal == null){
+                          degMap.put(dst,1)
+                          }else
+                          {
+                            degMap.put(dst,dstVal+1)
                           }
                         }
-                      }else{
-                        if(tmpbufx != null){
+  
+  
+                        val tmpbufx = ptable.get((src,degMap.get(src)))
+                        val tmpbufy = ptable.get((dst,degMap.get(dst)))
+                        if(directed == 0){
+                          if(tmpbufx != null){
+  
                           for(estimator <- tmpbufx) {
-
-                          r2(estimator) = edgeList(k)
-                          //locs(estimator) = src
-                          r2locs(estimator) = k
+  
+                            r2(estimator) = edgeList(k)
+                            locs(estimator) = src
+                            r2locs(estimator) = k
+                          }
+                          }else if(tmpbufy != null){
+  
+                            for(estimator <- tmpbufy) {
+  
+                              r2(estimator) = edgeList(k)
+                              locs(estimator) = dst
+                              r2locs(estimator) = k
+                            }
+                          }
+                        }else{
+                          if(tmpbufx != null){
+                            for(estimator <- tmpbufx) {
+  
+                            r2(estimator) = edgeList(k)
+                            //locs(estimator) = src
+                            r2locs(estimator) = k
+                          }
+                          }
+  
                         }
+  
+  
                         }
-
-                      }
-
-
-                      }
-
-            //step 3
-            for( i <- 0 to (r-1)) {
-              var node1 = (-1).toLong
-              var node2 = (-1).toLong
-              
-              if(directed == 0){
-                if(r1(i) != null){
-                  if(r1(i).srcId == locs(i))
-                  node1 = r1(i).dstId
-                  else
-                  node1 = r1(i).srcId 
-                }
-                if(r2(i) != null){
-                  if(r2(i).srcId == locs(i))
-                  node2 = r2(i).dstId
-                  else
-                  node2 = r2(i).srcId
-                }
-              }else{
-                if(r2(i) != null){
-                node1 = r2(i).dstId
-              }
-               if(r1(i) != null){
-                node2 = r1(i).srcId
-              }
-              }
-
-              
-              val tmpbuf = qtable.get((node1,node2))
-              if(tmpbuf == null){
-                qtable.put((node1,node2),Array(i))
+  
+              //step 3
+              for( i <- 0 to (r-1)) {
+                var node1 = (-1).toLong
+                var node2 = (-1).toLong
+                
+                if(directed == 0){
+                  if(r1(i) != null){
+                    if(r1(i).srcId == locs(i))
+                    node1 = r1(i).dstId
+                    else
+                    node1 = r1(i).srcId 
+                  }
+                  if(r2(i) != null){
+                    if(r2(i).srcId == locs(i))
+                    node2 = r2(i).dstId
+                    else
+                    node2 = r2(i).srcId
+                  }
                 }else{
-                  qtable.put((node1,node2),tmpbuf :+ i)
+                  if(r2(i) != null){
+                  node1 = r2(i).dstId
                 }
-              }
-
-              for( k <- 0 to (w-1)) {
-                val src = edgeList(k).srcId
-                val dst = edgeList(k).dstId
-                val tmpbuf = qtable.get((src,dst))
-
-                if(directed ==0 ){
-                  if(tmpbuf == null){
-                    val tmpbuf2 = qtable.get((dst,src))
-                    if(tmpbuf2 !=null){
-                      for( estimator <- tmpbuf2) {
-                       if(k>r2locs(estimator))
-                       close(estimator) = true
-                     } 
-                   }  
-                   }else{
-                    // val splitStr = tmpbuf.trim.split("\\s+")
-                    for( estimator <- tmpbuf) {
-                      if(k>r2locs(estimator))
-                      close(estimator) = true    
+                 if(r1(i) != null){
+                  node2 = r1(i).srcId
+                }
+                }
+  
+                
+                val tmpbuf = qtable.get((node1,node2))
+                if(tmpbuf == null){
+                  qtable.put((node1,node2),Array(i))
+                  }else{
+                    qtable.put((node1,node2),tmpbuf :+ i)
+                  }
+                }
+  
+                for( k <- 0 to (w-1)) {
+                  val src = edgeList(k).srcId
+                  val dst = edgeList(k).dstId
+                  val tmpbuf = qtable.get((src,dst))
+  
+                  if(directed ==0 ){
+                    if(tmpbuf == null){
+                      val tmpbuf2 = qtable.get((dst,src))
+                      if(tmpbuf2 !=null){
+                        for( estimator <- tmpbuf2) {
+                         if(k>r2locs(estimator))
+                         close(estimator) = true
+                       } 
+                     }  
+                     }else{
+                      // val splitStr = tmpbuf.trim.split("\\s+")
+                      for( estimator <- tmpbuf) {
+                        if(k>r2locs(estimator))
+                        close(estimator) = true    
+                      }
+  
+                    } 
+                  }else{
+                    if(tmpbuf != null){
+                       for( estimator <- tmpbuf) {
+                         if(k>r2locs(estimator))
+                         close(estimator) = true
+                       } 
                     }
-
-                  } 
-                }else{
-                  if(tmpbuf != null){
-                     for( estimator <- tmpbuf) {
-                       if(k>r2locs(estimator))
-                       close(estimator) = true
-                     } 
+  
                   }
-
+  
+                    }
+  
+                    var sum = 0
+                    for( i <- 0 to (r-1)) {
+                      if(close(i))
+                      sum += c(i)  
+                    }
+                    val totalT = sum*w.toDouble/r.toDouble
+                    Iterator(totalT)
+                  }
                 }
-
-                  }
-
-                  var sum = 0
-                  for( i <- 0 to (r-1)) {
-                    if(close(i))
-                    sum += c(i)  
-                  }
-                  val totalT = sum*w.toDouble/r.toDouble
-                  Iterator(totalT)
-                }
+  
+                val totalTriangle = parTriangle.reduce((a, b) => a + b) * numEPart.toDouble * numEPart.toDouble 
+                val totalTime = System.currentTimeMillis - startTime
+                println("############# The number of triangles is " + totalTriangle)
+                println("############# Total running time is " + totalTime.toDouble/1000.0)
+                
+	        // val pw = new PrintWriter(new File("output-"+System.currentTimeMillis.toDouble/1000.0/3600.0+".txt" ))
+                // pw.write("Triangles:"+totalTriangle+" Time:"+totalTime.toDouble/1000.0)
+                val pw = new PrintWriter(new FileOutputStream(new File("output_triangle.txt"),true))
+	        pw.println(r+"  "+totalTriangle+"  "+totalTime.toDouble/1000.0+" "+numEPart)
+	        //pw.close
+                //sc.stop()
+  
               }
-
-              val totalTriangle = parTriangle.reduce((a, b) => a + b) * numEPart.toDouble * numEPart.toDouble 
-              val totalTime = System.currentTimeMillis - startTime
-              println("############# The number of triangles is " + totalTriangle)
-              println("############# Total running time is " + totalTime.toDouble/1000.0)
-              
-	      // val pw = new PrintWriter(new File("output-"+System.currentTimeMillis.toDouble/1000.0/3600.0+".txt" ))
-              // pw.write("Triangles:"+totalTriangle+" Time:"+totalTime.toDouble/1000.0)
-              val pw = new PrintWriter(new FileOutputStream(new File("output_triangle.txt"),true))
-	      pw.println(r+"  "+totalTriangle+"  "+totalTime.toDouble/1000.0+" "+numEPart)
-	      pw.close
-              sc.stop()
-
             }
-          }
+    }
+    pw.close
+    sc.stop()
 // scalastyle:on println

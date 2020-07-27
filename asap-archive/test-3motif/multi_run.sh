@@ -19,7 +19,7 @@ do
     rm $OUTPUTFILE
   fi
   echo "Iteration " $RUN_ID
-  ./run.sh $GRAPH_PATH
+  sbt "run ${GRAPH_PATH} 10 --numEPart=2" >> $LOGFILE 2>&1
   mv $LOGFILE log/${YYMMDD}_3motif_${GRAPH_NAME}_${RUN_ID}.log
   mv $OUTPUTFILE output/${YYMMDD}_3motif_${GRAPH_NAME}_${RUN_ID}.txt
 done

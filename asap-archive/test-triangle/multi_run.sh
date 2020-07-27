@@ -3,7 +3,7 @@
 
 GRAPH_PATH=$1
 GRAPH_NAME=$(cut -d'/' -f3 <<< ${GRAPH_PATH} | cut -d'.' -f1)
-YYYYMMDD=$(date '+%Y%m%d')
+YYMMDD=$(date '+%Y%m%d')
 LOGFILE=triangle.log
 OUTPUTFILE=output_triangle.txt
 
@@ -19,9 +19,9 @@ do
     rm $OUTPUTFILE
   fi
   echo "Iteration " $RUN_ID
-  ./run.sh $GRAPH_PATH
-  mv $LOGFILE log/${YYYYMMDD}_triangle_${GRAPH_NAME}_${RUN_ID}.log
-  mv $OUTPUTFILE output/${YYYYMMDD}_triangle_${GRAPH_NAME}_${RUN_ID}.txt
+  sbt "run ${GRAPH_PATH} 0 10 --numEPart=2" >> $LOGFILE 2>&1
+  mv $LOGFILE log/${YYMMDD}_triangle_${GRAPH_NAME}_${RUN_ID}.log
+  mv $OUTPUTFILE output/${YYMMDD}_triangle_${GRAPH_NAME}_${RUN_ID}.txt
 done
 
-./merge_results.sh $GRAPH_NAME $YYYYMMDD
+./merge_results.sh ${GRAPH_NAME}
