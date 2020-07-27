@@ -5,16 +5,22 @@
 #include <fstream>
 #include <pthread.h>
 
-#include "host_graph_sw.h"
+//#include "host_graph_sw.h"
 
 #include "approximation.h"
 
 
-#define APPROXIMATE_FUNCTION         approximation_triangle_scheme_1
+//#define APPROXIMATE_FUNCTION         approximation_triangle_scheme_1
 
 //
 // Generate the numbers:
 //
+
+#define STRINGIFY_MACRO(x)          
+#define STR(x)                          #x
+#define STR_APPROXIMATE_FUNCTION        STR(APPROXIMATE_FUNCTION)
+
+
 
 
 #define MAX_NUN_THREADS 16
@@ -105,7 +111,7 @@ int main(int argc, char **argv) {
     int printf_flag = std::stoi(argv[1]);
     std::string mode = "normal";
 
-    DEBUG_PRINTF("start main\n");
+    DEBUG_PRINTF("start main: %s \n",STR_APPROXIMATE_FUNCTION);
 
     std::cout << std::hex << std::showbase;
 
@@ -122,8 +128,7 @@ int main(int argc, char **argv) {
 
     int est_num_map [] = { 16, 100, 1000, 2000,
                            5000, 10000, 20000, 50000,
-                           100000, 200000, 500000, 1000 * 1000,
-                           1000 * 1000 * 2, 1000 * 1000 * 5
+                           100000, 200000, 500000, 1000 * 1000
                          };
 #if 0
     const int total_k = ARRAY_SIZE(est_num_map) - 3;

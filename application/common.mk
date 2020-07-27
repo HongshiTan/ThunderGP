@@ -74,7 +74,7 @@ CXXFLAGS += -I $(APPCONFIG)
 
 # Host linker flags
 LDFLAGS := $(opencl_LDFLAGS)
-LDFLAGS += -lrt -lstdc++  -lxilinxopencl
+LDFLAGS += -lrt -lstdc++
 LDFLAGS += -lgmp -lboost_system -lboost_random
 
 ifeq ($(TARGET),$(filter $(TARGET), hw_emu))
@@ -103,10 +103,10 @@ BINARY_CONTAINERS += $(XCLBIN)/graph_fpga.$(TARGET).$(DSA).xclbin
 
 #Include Libraries
 
-include $(UTILS_PATH)/xcl/xcl.mk
-CXXFLAGS +=  $(xcl_CXXFLAGS)
-LDFLAGS +=   $(xcl_CXXFLAGS)
-HOST_SRCS += $(xcl_SRCS)
+#include $(UTILS_PATH)/xcl/xcl.mk
+#CXXFLAGS +=  $(xcl_CXXFLAGS)
+#LDFLAGS +=   $(xcl_CXXFLAGS)
+#HOST_SRCS += $(xcl_SRCS)
 
 
 #############################################################################

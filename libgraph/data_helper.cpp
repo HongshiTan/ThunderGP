@@ -1,6 +1,8 @@
 #include <stdio.h>
 
-#include "host_graph_sw.h"
+#include "graph.h"
+#include "common.h"
+//#include "host_graph_sw.h"
 
 static int startIdx = 0;
 

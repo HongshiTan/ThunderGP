@@ -1,8 +1,9 @@
 #ifndef __APPROXIMATION_H__
 #define __APPROXIMATION_H__
 
-#include "host_graph_sw.h"
-
+//#include "host_graph_sw.h"
+#include "graph.h"
+#include "common.h"
 
 #include <boost/multiprecision/gmp.hpp>
 #include <boost/multiprecision/random.hpp>

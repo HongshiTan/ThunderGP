@@ -28,5 +28,14 @@
 
 #define SIZE_ALIGNMENT(in,align)     ((((((unsigned int)(in + 1))/(align)) + 1) * (align )) - 1) 
 
+typedef struct
+{
+    int vertexNum;
+    int compressedVertexNum;
+    int edgeNum;
+    int blkNum;
+} graphInfo;
+
+Graph* createGraph(const std::string &gName, const std::string &mode);
 
 #endif /* __COMMON_H__ */
