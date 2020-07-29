@@ -117,10 +117,10 @@ int main(int argc, char **argv) {
 
     Graph* gptr = createGraph(gName, mode);
     DEBUG_PRINTF("edge num :%d \n",gptr->edgeNum);
-    
+
     //CSR* csr    = new CSR(*gptr);
 
-    int edgeNum   = csr ->edgeNum;
+    int edgeNum   = gptr ->edgeNum;
 
     //rng_res_test(csr, 100000);
     //return 0;
@@ -231,7 +231,7 @@ int main(int argc, char **argv) {
 //        std::cout << ui(mt) << std::endl;
 
     free(gptr);
-    free(csr);
+    //free(csr);
 
     return 0;
 #endif
