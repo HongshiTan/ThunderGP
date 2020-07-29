@@ -1,7 +1,7 @@
 
 #include "approximation.h"
 
-int approximation_motifs_scheme_2(estimator *p_est, Graph* gptr, CSR* csr, int id)
+int approximation_motifs_scheme_2(estimator *p_est, Graph* gptr, int edgeNum , int id)
 {
     prng mt;
     static int counter = 0;
@@ -9,7 +9,6 @@ int approximation_motifs_scheme_2(estimator *p_est, Graph* gptr, CSR* csr, int i
 
     counter ++;
     memset(p_est, 0, sizeof(estimator));
-    int edgeNum   = csr ->edgeNum;
     uniform_int_distribution<mpz_int> ui(0, edgeNum - 1);
 
     sample_edge * p_first    = &p_est->first_edge;
@@ -56,7 +55,7 @@ int approximation_motifs_scheme_2(estimator *p_est, Graph* gptr, CSR* csr, int i
     if (p_est->status == 3)
     {
         p_est->neighbor_counter = temp_neighbor_counter;
-        p_est->expecation = (double)(temp_neighbor_counter)  * edgeNum;
+        p_est->expecation = (double)(temp_neighbor_counter);
     }
     else
     {
@@ -66,14 +65,14 @@ int approximation_motifs_scheme_2(estimator *p_est, Graph* gptr, CSR* csr, int i
 }
 
 
-int approximation_motifs_scheme_1(estimator *p_est, Graph* gptr, CSR* csr, int id)
+int approximation_motifs_scheme_1(estimator *p_est, Graph* gptr, int edgeNum, int id)
 {
     prng mt;
     static int counter = 0;
     mt.seed(static_cast<unsigned int>(std::time(0)) + (unsigned long)(p_est) + counter);
     counter ++;
     memset(p_est, 0, sizeof(estimator));
-    int edgeNum   = csr ->edgeNum;
+  
 
     sample_edge * p_first    = &p_est->first_edge;
     sample_edge * p_second    = &p_est->second_edge;
@@ -144,7 +143,7 @@ int approximation_motifs_scheme_1(estimator *p_est, Graph* gptr, CSR* csr, int i
     p_est->status = 3;
     if (p_est->status == 3)
     {
-        p_est->expecation = ((double)temp_neighbor_counter)  * edgeNum;
+        p_est->expecation = ((double)temp_neighbor_counter);
     }
     else
     {

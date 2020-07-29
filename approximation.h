@@ -48,19 +48,20 @@ typedef struct
     unsigned int run;
     unsigned int counter;
     unsigned int est_id;
+    int edgeNum;
 } thread_item;
 
 
 typedef mt11213b  prng;
 
-int approximation_motifs_scheme_1(estimator *p_est, Graph* gptr, CSR* csr, int id);
-int approximation_motifs_scheme_2(estimator *p_est, Graph* gptr, CSR* csr, int id);
+int approximation_motifs_scheme_1(estimator *p_est, Graph* gptr, int edgeNum, int id);
+int approximation_motifs_scheme_2(estimator *p_est, Graph* gptr, int edgeNum, int id);
 
 
 int triangle_count(Graph* gptr, CSR* csr, int num);
 
-int approximation_triangle_scheme_1(estimator *p_est, Graph* gptr, CSR* csr, int id);
-int approximation_triangle_scheme_2(estimator *p_est, Graph* gptr, CSR* csr, int id);
+int approximation_triangle_scheme_1(estimator *p_est, Graph* gptr, int edgeNum, int id);
+int approximation_triangle_scheme_2(estimator *p_est, Graph* gptr, int edgeNum, int id);
 
 inline int reservoir_sampling(int n, prng &lmt)
 {

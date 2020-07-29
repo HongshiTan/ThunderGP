@@ -42,7 +42,7 @@ void *approximation_thread(void *argv)
 
     //DEBUG_PRINTF("here\n");
     thread_item *p_data = (thread_item *)argv;
-    APPROXIMATE_FUNCTION(p_data->est, p_data->gptr, p_data->csr, p_data->est_id);
+    APPROXIMATE_FUNCTION(p_data->est, p_data->gptr, p_data->edgeNum, p_data->est_id);
     return 0;
 }
 
@@ -116,7 +116,9 @@ int main(int argc, char **argv) {
     std::cout << std::hex << std::showbase;
 
     Graph* gptr = createGraph(gName, mode);
-    CSR* csr    = new CSR(*gptr);
+    DEBUG_PRINTF("edge num :%d \n",gptr->edgeNum);
+    
+    //CSR* csr    = new CSR(*gptr);
 
     int edgeNum   = csr ->edgeNum;
 
@@ -166,7 +168,7 @@ int main(int argc, char **argv) {
                 {
                     threads[j].est  = &local_estimator[j];
                     threads[j].gptr = gptr;
-                    threads[j].csr  = csr;
+                    threads[j].edgeNum  = gptr->edgeNum;
                     pthread_create(&threads[j].pid, NULL, approximation_thread, &threads[j]);
                 }
 
@@ -217,7 +219,7 @@ int main(int argc, char **argv) {
             }
             if (1)
             {
-                DEBUG_PRINTF("result %lf @ %d with %d,total %d \n", (double(result ) / total_est_num),
+                DEBUG_PRINTF("result %lf @ %d with %d,total %d \n", (double(result ) * ((double)edgeNum / total_est_num)),
                              repeat, total_est_num,
                              success_counter);
 
