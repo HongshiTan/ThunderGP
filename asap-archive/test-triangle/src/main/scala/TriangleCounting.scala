@@ -41,8 +41,12 @@ object TriangleCounting extends Logging{
 
     val options = mutable.Map(optionsList: _*)
 
-    val conf = new SparkConf().setMaster("local[1]")
-    GraphXUtils.registerKryoClasses(conf)
+    val conf = new SparkConf().setMaster("local[*]")
+conf.set("spark.executor.heartbeatInterval", "20000000")
+        conf.set("spark.network.timeout", "30000000")
+        conf.set("spark.kryo.referenceTracking","false")
+        conf.set("spark.driver.memory","300g")
+     GraphXUtils.registerKryoClasses(conf)
 
 
     val numEPart = options.remove("numEPart").map(_.toInt).getOrElse {
@@ -58,7 +62,8 @@ object TriangleCounting extends Logging{
     .map(StorageLevel.fromString(_)).getOrElse(StorageLevel.MEMORY_ONLY)
 
     val sc = new SparkContext(conf.setAppName("TriangleCount(" + fname + ")"))
-
+sc.hadoopConfiguration.set("mapred.min.split.size", " 536870912")
+    sc.hadoopConfiguration.set("mapred.max.split.size", " 536870912")
     val graph = GraphLoader.edgeListFile(sc, fname,
       canonicalOrientation = false,
       numEdgePartitions = numEPart,
