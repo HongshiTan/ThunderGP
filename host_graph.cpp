@@ -55,7 +55,7 @@ int rng_test(CSR* csr, int num)
 
     counter ++;
     int edgeNum   = csr ->edgeNum;
-    uniform_int_distribution<mpz_int> ui(0, edgeNum - 1);
+    boost::random::uniform_int_distribution<mpz_int> ui(0, edgeNum - 1);
     for (int i = 0; i < num; i ++)
     {
         int loc = static_cast<int>(ui(mt));
@@ -72,7 +72,6 @@ int rng_res_test(CSR* csr, int num)
 
     counter ++;
     int edgeNum   = csr ->edgeNum;
-    uniform_int_distribution<mpz_int> ui(0, edgeNum - 1);
     for (int i = 0; i < num; i ++)
     {
         int loc = 0;
@@ -95,7 +94,13 @@ graphInfo graphDataInfo;
 
 #define EST_NUM                 (10)
 
+
+prng mt;
+pthread_mutex_t lock;
+
 int main(int argc, char **argv) {
+
+    mt.seed(static_cast<unsigned int>(std::time(0)));
 
     std::string gName;
     if (argc > 2)
@@ -111,21 +116,28 @@ int main(int argc, char **argv) {
     int printf_flag = std::stoi(argv[1]);
     std::string mode = "normal";
 
-    DEBUG_PRINTF("start main: %s \n",STR_APPROXIMATE_FUNCTION);
+    DEBUG_PRINTF("start main: %s \n", STR_APPROXIMATE_FUNCTION);
 
     std::cout << std::hex << std::showbase;
 
     Graph* gptr = createGraph(gName, mode);
-    DEBUG_PRINTF("edge num :%d \n",gptr->edgeNum);
+    DEBUG_PRINTF("edge num :%d \n", gptr->edgeNum);
 
     //CSR* csr    = new CSR(*gptr);
 
     int edgeNum   = gptr ->edgeNum;
 
+
+    if (pthread_mutex_init(&lock, NULL) != 0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+
     //rng_res_test(csr, 100000);
     //return 0;
 
-   //1465313402
+    //1465313402
 
 
     int est_num_map [] = { 16, 100, 1000, 2000,
@@ -146,10 +158,12 @@ int main(int argc, char **argv) {
 #else
     //ARRAY_SIZE(est_num_map)
     int est_id = 0;
+
     const int total_k = ARRAY_SIZE(est_num_map);
     for (int k = 0; k < total_k ; k ++)
     {
         est_num = est_num_map[k];
+        boost::random::uniform_int_distribution<mpz_int> iui(0, (edgeNum - 1) );
         for (int repeat = 0; repeat < 1; repeat ++)
         {
 
@@ -159,7 +173,7 @@ int main(int argc, char **argv) {
                 threads[j].counter = 0;
                 threads[j].run = 0;
                 est_id ++;
-                threads[j].est_id = est_id;
+                threads[j].est_id = est_id + static_cast<int>(iui(mt));
             }
 
             for (int i = 0 ; i < est_num / 16; i ++)
@@ -219,9 +233,9 @@ int main(int argc, char **argv) {
             }
             if (1)
             {
-                DEBUG_PRINTF("result %lf @ %d with %d,total %d \n", (double(result ) * ((double)edgeNum / total_est_num)),
+                DEBUG_PRINTF("result %lf @ %d with %d,total %d ratio %lf %lf\n", (double(result ) * ((double)edgeNum / total_est_num)),
                              repeat, total_est_num,
-                             success_counter);
+                             success_counter, ((double)success_counter / total_est_num), ((double)result / (double)success_counter));
 
             }
         }

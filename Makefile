@@ -70,18 +70,22 @@ $(EXECUTABLE): $(HOST_SRCS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -o '$@' $(LDFLAGS)
 
 
+.PHONY: approximation_motifs_scheme_1
 approximation_motifs_scheme_1: $(HOST_SRCS)
 	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -DAPPROXIMATE_FUNCTION=approximation_motifs_scheme_1 -o '$@' $(LDFLAGS)
 
+.PHONY: approximation_motifs_scheme_2
 approximation_motifs_scheme_2: $(HOST_SRCS)
 	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -DAPPROXIMATE_FUNCTION=approximation_motifs_scheme_2 -o '$@' $(LDFLAGS)
 
+.PHONY: approximation_triangle_scheme_1
 approximation_triangle_scheme_1: $(HOST_SRCS)
 	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -DAPPROXIMATE_FUNCTION=approximation_triangle_scheme_1 -o '$@' $(LDFLAGS)
 
+.PHONY: approximation_triangle_scheme_2
 approximation_triangle_scheme_2: $(HOST_SRCS)
 	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -DAPPROXIMATE_FUNCTION=approximation_triangle_scheme_2 -o '$@' $(LDFLAGS)

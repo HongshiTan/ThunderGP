@@ -1,18 +1,19 @@
 
 #include "approximation.h"
 
+
+
+extern prng mt;
+
 int approximation_motifs_scheme_2(estimator *p_est, Graph* gptr, int edgeNum , int id)
 {
-    prng mt;
     static int counter = 0;
-    mt.seed(static_cast<unsigned int>(std::time(0)) + (unsigned long)(p_est) + counter);
-
     counter ++;
     memset(p_est, 0, sizeof(estimator));
-    uniform_int_distribution<mpz_int> ui(0, edgeNum - 1);
+    boost::random::uniform_int_distribution<mpz_int> ui(0, edgeNum - 1);
 
     sample_edge * p_first    = &p_est->first_edge;
-    sample_edge * p_second    = &p_est->second_edge;
+    //sample_edge * p_second    = &p_est->second_edge;
 
 
     int start_edge = static_cast<int>(ui(mt));
@@ -67,15 +68,18 @@ int approximation_motifs_scheme_2(estimator *p_est, Graph* gptr, int edgeNum , i
 
 int approximation_motifs_scheme_1(estimator *p_est, Graph* gptr, int edgeNum, int id)
 {
-    prng mt;
+    prng lmt;
     static int counter = 0;
-    mt.seed(static_cast<unsigned int>(std::time(0)) + (unsigned long)(p_est) + counter);
+    
+    unsigned long seed = id + static_cast<unsigned int>(std::time(0)) + (unsigned long)(p_est) + counter;
+    //DEBUG_PRINTF("seed %d \n",seed);
+    lmt.seed(seed);
     counter ++;
     memset(p_est, 0, sizeof(estimator));
   
 
     sample_edge * p_first    = &p_est->first_edge;
-    sample_edge * p_second    = &p_est->second_edge;
+    //sample_edge * p_second    = &p_est->second_edge;
 
     p_est->status = 0;
     p_est->expecation = 0;
@@ -84,7 +88,7 @@ int approximation_motifs_scheme_1(estimator *p_est, Graph* gptr, int edgeNum, in
     int temp_neighbor_counter  = 0;
     for (int i = start_index; i < edgeNum; i++)
     {
-        if (reservoir_sampling(i + 1, mt) )
+        if (reservoir_sampling(i + 1, lmt) )
         {
             p_est->first_edge.node[0] = gptr->data[i][0];
             p_est->first_edge.node[1] = gptr->data[i][1];

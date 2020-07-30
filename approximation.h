@@ -4,6 +4,7 @@
 //#include "host_graph_sw.h"
 #include "graph.h"
 #include "common.h"
+#include "pthread.h"
 
 #include <boost/multiprecision/gmp.hpp>
 #include <boost/multiprecision/random.hpp>
@@ -63,10 +64,16 @@ int triangle_count(Graph* gptr, CSR* csr, int num);
 int approximation_triangle_scheme_1(estimator *p_est, Graph* gptr, int edgeNum, int id);
 int approximation_triangle_scheme_2(estimator *p_est, Graph* gptr, int edgeNum, int id);
 
+extern prng  mt;
+
+extern pthread_mutex_t lock;
+
 inline int reservoir_sampling(int n, prng &lmt)
 {
-    bernoulli_distribution<double> p(1.0 / (n));
-    bool res = p(lmt);
+    boost::random::bernoulli_distribution<double> p(1.0 / (n));
+    pthread_mutex_lock(&lock);
+    bool res = p(mt);
+    pthread_mutex_unlock(&lock);
     //DEBUG_PRINTF("n %d, res %d\n", n, res);
     if (res)
     {
