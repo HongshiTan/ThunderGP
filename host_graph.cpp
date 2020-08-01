@@ -21,9 +21,6 @@
 #define STR_APPROXIMATE_FUNCTION        STRINGIFY_MACRO(APPROXIMATE_FUNCTION)
 
 
-
-
-#define MAX_NUN_THREADS 16
 thread_item   threads[MAX_NUN_THREADS];
 
 #define  MAX_NUM_ESTIMATOR  (1000 * 1000 * 10)
@@ -140,9 +137,8 @@ int main(int argc, char **argv) {
     //1465313402
 
 
-    int est_num_map [] = { 16, 100, 1000, 2000,
-                           5000, 10000, 20000, 50000,
-                           100000, 200000, 500000, 1000 * 1000
+    int est_num_map [] = { 10, 20, 50, 100, 200, 500, 1000, 2000,
+                           5000, 10000
                          };
 #if 0
     const int total_k = ARRAY_SIZE(est_num_map) - 3;
@@ -164,81 +160,82 @@ int main(int argc, char **argv) {
     {
         est_num = est_num_map[k];
         boost::random::uniform_int_distribution<mpz_int> iui(0, (edgeNum - 1) );
-        for (int repeat = 0; repeat < 1; repeat ++)
+
+
+        for (int j = 0; j < ARRAY_SIZE(threads); j++)
         {
-
-            for (int j = 0; j < ARRAY_SIZE(threads); j++)
-            {
-                threads[j].expecation = 0.0;
-                threads[j].counter = 0;
-                threads[j].run = 0;
-                est_id ++;
-                threads[j].est_id = est_id + static_cast<int>(iui(mt));
-            }
-
-            for (int i = 0 ; i < est_num / 16; i ++)
-            {
-                for (int j = 0; j < ARRAY_SIZE(threads); j++)
-                {
-                    threads[j].est  = &local_estimator[j];
-                    threads[j].gptr = gptr;
-                    threads[j].edgeNum  = gptr->edgeNum;
-                    pthread_create(&threads[j].pid, NULL, approximation_thread, &threads[j]);
-                }
-
-                for (int j = 0; j < ARRAY_SIZE(threads); j++)
-                {
-                    pthread_join(threads[j].pid, NULL);
-
-                    if (local_estimator[j].status == 3)
-                    {
-                        threads[j].expecation += local_estimator[j].expecation;
-                        threads[j].counter++;
-                    }
-                    threads[j].run ++;
-                    estimator * p_est    = &local_estimator[j];
-                    sample_edge * p_first     = &p_est->first_edge;
-                    sample_edge * p_second = &p_est->second_edge;
-                    if  (printf_flag == 1)
-                    {
-                        DEBUG_PRINTF("%d nc %d (%d %d) %d-[%d %d] %d-[%d %d] --> %f\n",
-                                     p_est->status ,
-                                     p_est->neighbor_counter,
-                                     p_first->update_counter,
-                                     p_second->update_counter,
-                                     p_first->id,
-                                     p_first->node[0],
-                                     p_first->node[1],
-                                     p_second->id,
-                                     p_second->node[0],
-                                     p_second->node[1],
-                                     p_est->expecation);
-                    }
-                }
-
-                //estimator * p_est    = &local_estimator[i];
-
-                //success_counter += approximation(p_est, gptr, csr);
-            }
-            double result = 0;
-            int total_est_num = 0;
-            int success_counter = 0;
-
-            for (int j = 0; j < ARRAY_SIZE(threads); j++)
-            {
-                result += threads[j].expecation;
-                total_est_num += threads[j].run;
-                success_counter += threads[j].counter;
-
-            }
-            if (1)
-            {
-                DEBUG_PRINTF("result %lf @ %d with %d,total %d ratio %lf %lf\n", (double(result ) * ((double)edgeNum / total_est_num)),
-                             repeat, total_est_num,
-                             success_counter, ((double)success_counter / total_est_num), ((double)result / (double)success_counter));
-
-            }
+            threads[j].expecation = 0.0;
+            threads[j].counter = 0;
+            threads[j].run = 0;
+            est_id ++;
+            threads[j].est_id = est_id + static_cast<int>(iui(mt));
         }
+
+        for (int i = 0 ; i < est_num / ARRAY_SIZE(threads); i ++)
+        {
+            //DEBUG_PRINTF("%d i \n",i);
+            for (int j = 0; j < ARRAY_SIZE(threads); j++)
+            {
+                local_estimator[j].sub_est_num = SUB_EST;
+                threads[j].est  = &local_estimator[j];
+                threads[j].gptr = gptr;
+                threads[j].edgeNum  = gptr->edgeNum;
+                pthread_create(&threads[j].pid, NULL, approximation_thread, &threads[j]);
+            }
+
+            for (int j = 0; j < ARRAY_SIZE(threads); j++)
+            {
+                pthread_join(threads[j].pid, NULL);
+
+                if (local_estimator[j].status == 3)
+                {
+                    threads[j].expecation += local_estimator[j].expecation;
+                    threads[j].counter    += local_estimator[j].success;
+                }
+                threads[j].run ++;
+                estimator * p_est      = &local_estimator[j];
+                sample_edge * p_first  = &p_est->first_edge;
+                sample_edge * p_second = &p_est->second_edge;
+                if  (printf_flag == 1)
+                {
+                    DEBUG_PRINTF("%d nc %d (%d %d) %d-[%d %d] %d-[%d %d] --> %f\n",
+                                 p_est->status ,
+                                 p_est->neighbor_counter,
+                                 p_first->update_counter,
+                                 p_second->update_counter,
+                                 p_first->id,
+                                 p_first->node[0],
+                                 p_first->node[1],
+                                 p_second->id,
+                                 p_second->node[0],
+                                 p_second->node[1],
+                                 p_est->expecation);
+                }
+            }
+
+            //estimator * p_est    = &local_estimator[i];
+
+            //success_counter += approximation(p_est, gptr, csr);
+        }
+        double result = 0;
+        int total_est_num = 0;
+        int success_counter = 0;
+
+        for (int j = 0; j < ARRAY_SIZE(threads); j++)
+        {
+            result += threads[j].expecation;
+            total_est_num += threads[j].run;
+            success_counter += threads[j].counter;
+
+        }
+        if (1)
+        {
+            DEBUG_PRINTF("result %lf  with %d, success %d ratio %lf %lf\n", (double(result ) * ((double)edgeNum / total_est_num)),
+                total_est_num * SUB_EST,
+                success_counter, ((double)success_counter / total_est_num), ((double)result / (double)success_counter));
+
+        }
+
 
     }
 //    for (unsigned i = 0; i < 10; ++i)

@@ -6,10 +6,12 @@ mkdir -p ${log_path}
 
 test() {
 
-./approximation_triangle_scheme_1 0 $1  > ./${log_path}/$2_$3_t1.log
-./approximation_triangle_scheme_2 0 $1  > ./${log_path}/$2_$3_t2.log
-./approximation_motifs_scheme_1   0 $1  > ./${log_path}/$2_$3_m1.log
-./approximation_motifs_scheme_2   0 $1  > ./${log_path}/$2_$3_m2.log
+#./approximation_triangle_scheme_1 0 $1  > ./${log_path}/$2_$3_t1.log
+#./approximation_triangle_scheme_2 0 $1  > ./${log_path}/$2_$3_t2.log
+./approximation_triangle_scheme_3 0 $1  > ./${log_path}/$2_$3_t3.log
+#./approximation_motifs_scheme_1   0 $1  > ./${log_path}/$2_$3_m1.log
+#./approximation_motifs_scheme_2   0 $1  > ./${log_path}/$2_$3_m2.log
+./approximation_motifs_scheme_3 0 $1    > ./${log_path}/$2_$3_m3.log
 
 }
 

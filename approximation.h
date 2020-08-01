@@ -13,13 +13,16 @@ using namespace boost::multiprecision;
 using namespace boost::random;
 
 
-#define  MAX_NUM_ESTIMATOR  (1000 * 1000 * 10)
+#define MAX_NUM_ESTIMATOR   (1000 * 1000 * 10)
+#define SUB_EST             (1000)
+#define MAX_NUN_THREADS     (10)
 
 
 typedef struct
 {
     unsigned int id;
     int node[2];
+    int temp_deg[2];
     unsigned int p;
     unsigned int update_counter;
 } sample_edge;
@@ -36,6 +39,9 @@ typedef struct {
     unsigned int neighbor_id;
     unsigned char neighbor_flag;
     unsigned int status;
+    unsigned int sub_est_num;
+    unsigned int temp_neighbor_counter;
+    unsigned int success;
 
 } estimator;
 
@@ -57,12 +63,13 @@ typedef mt11213b  prng;
 
 int approximation_motifs_scheme_1(estimator *p_est, Graph* gptr, int edgeNum, int id);
 int approximation_motifs_scheme_2(estimator *p_est, Graph* gptr, int edgeNum, int id);
-
+int approximation_motifs_scheme_3(estimator *g_est, Graph* gptr, int edgeNum , int est_id);
 
 int triangle_count(Graph* gptr, CSR* csr, int num);
 
 int approximation_triangle_scheme_1(estimator *p_est, Graph* gptr, int edgeNum, int id);
 int approximation_triangle_scheme_2(estimator *p_est, Graph* gptr, int edgeNum, int id);
+int approximation_triangle_scheme_3(estimator *g_est, Graph* gptr, int edgeNum , int est_id);
 
 extern prng  mt;
 
