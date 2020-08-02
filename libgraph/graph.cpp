@@ -8,7 +8,9 @@ void Graph::loadFile(
     std::vector<std::vector<int>> &data
 )
 {
-    std::ifstream fhandle(gName.c_str());
+    std::ifstream fhandle;
+    fhandle.rdbuf()->pubsetbuf(0, 0);
+    fhandle.open(gName.c_str());
     if (!fhandle.is_open()) {
         HERE;
         std::cout << "Failed to open " << gName << std::endl;
@@ -22,6 +24,7 @@ void Graph::loadFile(
             std::vector<int>(std::istream_iterator<int>(iss),
                              std::istream_iterator<int>())
         );
+        line.clear();
     }
     fhandle.close();
 
