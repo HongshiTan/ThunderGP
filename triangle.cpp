@@ -3,7 +3,26 @@
 
 #include <list>
 
+#define S3_DEBUG(fmt,...)    ;
+
+
 extern prng mt;
+
+typedef struct
+{
+    int id;
+    int deg;
+    int v;
+} l2_sample;
+
+typedef struct
+{
+    int id;
+    int r2_id;
+    int node[2];
+} check_sample;
+
+
 
 
 int approximation_triangle_scheme_2(estimator *p_est, Graph* gptr, int edgeNum, int id)
@@ -36,20 +55,16 @@ int approximation_triangle_scheme_2(estimator *p_est, Graph* gptr, int edgeNum, 
         int ln = gptr->data[i][0];
         int rn = gptr->data[i][1];
 
-#if 1
+
         if ((ln == p_first->node[0]) || (rn == p_first->node[0]))
         {
-            //p_est->neighbor_flag = 1;
             adjacent_flag = 1;
         }
-#endif
-#if 1
         if ((ln == p_first->node[1]) || (rn == p_first->node[1]))
         {
-            //p_est->neighbor_flag = 0;
             adjacent_flag = 1;
         }
-#endif
+
         if (adjacent_flag == 1)
         {
             tmp_neighbor_counter ++;
@@ -76,20 +91,18 @@ int approximation_triangle_scheme_2(estimator *p_est, Graph* gptr, int edgeNum, 
         int ln = gptr->data[i][0];
         int rn = gptr->data[i][1];
 
-#if 1
+
         if ((ln == p_first->node[0]) || (rn == p_first->node[0]))
         {
             //p_est->neighbor_flag = 1;
             adjacent_flag = 1;
         }
-#endif
-#if 1
         if ((ln == p_first->node[1]) || (rn == p_first->node[1]))
         {
             //p_est->neighbor_flag = 0;
             adjacent_flag = 1;
         }
-#endif
+
         if (adjacent_flag == 1)
         {
 
@@ -205,18 +218,14 @@ int approximation_triangle_scheme_1(estimator *p_est, Graph* gptr, int edgeNum, 
 
             int adjacent_flag = 0;
 
-#if 1
             if ((ln == p_first->node[0]) || (rn == p_first->node[0]))
             {
                 adjacent_flag = 1;
             }
-#endif
-#if 1
             if ((ln == p_first->node[1]) || (rn == p_first->node[1]))
             {
                 adjacent_flag = 1;
             }
-#endif
             if (adjacent_flag == 1)
             {
                 temp_neighbor_counter ++;
@@ -299,21 +308,6 @@ int approximation_triangle_scheme_1(estimator *p_est, Graph* gptr, int edgeNum, 
     return  0;
 }
 
-typedef struct
-{
-    int id;
-    int deg;
-    int v;
-} l2_sample;
-
-typedef struct
-{
-    int id;
-    int r2_id;
-    int node[2];
-} check_sample;
-
-#define S3_DEBUG(fmt,...)    ;
 
 int approximation_triangle_scheme_3(estimator *g_est, Graph* gptr, int edgeNum , int est_id)
 {

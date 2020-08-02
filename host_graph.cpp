@@ -5,39 +5,18 @@
 #include <fstream>
 #include <pthread.h>
 
-//#include "host_graph_sw.h"
-
 #include "approximation.h"
 
-
-//#define APPROXIMATE_FUNCTION         approximation_triangle_scheme_1
-
-//
-// Generate the numbers:
-//
-
-#define STRINGIFY_MACRO(x)              STR(x)
-#define STR(x)                          #x
 #define STR_APPROXIMATE_FUNCTION        STRINGIFY_MACRO(APPROXIMATE_FUNCTION)
-
-
-thread_item   threads[MAX_NUN_THREADS];
 
 #define  MAX_NUM_ESTIMATOR  (1000 * 1000 * 10)
 
-#define STATUS_FIRST_EDGE       (0)
-#define STATUS_SECOND_EDGE      (1)
-#define STATUS_CLOSE            (2)
-#define STATUS_END              (3)
-
-
 estimator local_estimator[MAX_NUN_THREADS];
+thread_item   threads[MAX_NUN_THREADS];
 
 
 void *approximation_thread(void *argv)
 {
-
-    //DEBUG_PRINTF("here\n");
     thread_item *p_data = (thread_item *)argv;
     APPROXIMATE_FUNCTION(p_data->est, p_data->gptr, p_data->edgeNum, p_data->est_id);
     return 0;
@@ -87,10 +66,6 @@ int rng_res_test(CSR* csr, int num)
 
 using namespace std;
 
-graphInfo graphDataInfo;
-
-#define EST_NUM                 (10)
-
 
 prng mt;
 pthread_mutex_t lock;
@@ -109,7 +84,7 @@ int main(int argc, char **argv) {
         gName = "rmat-19-32";
     }
 
-    int est_num = (argc < 4) ? EST_NUM : std::stoi(argv[3]);
+    int est_num = (argc < 4) ? 1000 : std::stoi(argv[3]);
     int printf_flag = std::stoi(argv[1]);
     std::string mode = "normal";
 
@@ -120,8 +95,6 @@ int main(int argc, char **argv) {
     Graph* gptr = createGraph(gName, mode);
     DEBUG_PRINTF("edge num :%d \n", gptr->edgeNum);
 
-    //CSR* csr    = new CSR(*gptr);
-
     int edgeNum   = gptr ->edgeNum;
 
 
@@ -131,28 +104,11 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    //rng_res_test(csr, 100000);
-    //return 0;
-
-    //1465313402
 
 
     int est_num_map [] = { 10, 20, 50, 100, 200, 500, 1000, 2000,
                            5000, 10000
                          };
-#if 0
-    const int total_k = ARRAY_SIZE(est_num_map) - 3;
-    for (int k = 0; k < total_k ; k ++)
-    {
-        est_num = est_num_map[k];
-        triangle_count(gptr, csr, est_num);
-    }
-
-    free(gptr);
-    free(csr);
-    return 0;
-#else
-    //ARRAY_SIZE(est_num_map)
     int est_id = 0;
 
     const int total_k = ARRAY_SIZE(est_num_map);
@@ -231,20 +187,15 @@ int main(int argc, char **argv) {
         if (1)
         {
             DEBUG_PRINTF("result %lf  with %d, success %d ratio %lf %lf\n", (double(result ) * ((double)edgeNum / total_est_num)),
-                total_est_num * SUB_EST,
-                success_counter, ((double)success_counter / total_est_num), ((double)result / (double)success_counter));
+                         total_est_num * SUB_EST,
+                         success_counter, ((double)success_counter / total_est_num), ((double)result / (double)success_counter));
 
         }
 
 
     }
-//    for (unsigned i = 0; i < 10; ++i)
-//        std::cout << ui(mt) << std::endl;
 
     free(gptr);
-    //free(csr);
-
     return 0;
-#endif
 }
 

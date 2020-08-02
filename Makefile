@@ -46,7 +46,7 @@ application:: $(APPCONFIG)
 all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig application
 
 .PHONY: exe
-exe: cleanexe approximation_motifs_scheme_1 approximation_motifs_scheme_2 approximation_triangle_scheme_1 approximation_triangle_scheme_2
+exe: cleanexe approximation_motifs_scheme_1  approximation_triangle_scheme_1  approximation_motifs_scheme_3 approximation_triangle_scheme_3
 
 # Building kernel
 
@@ -71,34 +71,28 @@ $(EXECUTABLE): $(HOST_SRCS)
 
 .PHONY: approximation_motifs_scheme_3
 approximation_motifs_scheme_3: $(HOST_SRCS)
-	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -DAPPROXIMATE_FUNCTION=approximation_motifs_scheme_3 -o '$@' $(LDFLAGS)
 
 
 .PHONY: approximation_triangle_scheme_3
 approximation_triangle_scheme_3: $(HOST_SRCS)
-	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -DAPPROXIMATE_FUNCTION=approximation_triangle_scheme_3 -o '$@' $(LDFLAGS)
 
 
 .PHONY: approximation_motifs_scheme_1
 approximation_motifs_scheme_1: $(HOST_SRCS)
-	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -DAPPROXIMATE_FUNCTION=approximation_motifs_scheme_1 -o '$@' $(LDFLAGS)
 
 .PHONY: approximation_motifs_scheme_2
 approximation_motifs_scheme_2: $(HOST_SRCS)
-	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -DAPPROXIMATE_FUNCTION=approximation_motifs_scheme_2 -o '$@' $(LDFLAGS)
 
 .PHONY: approximation_triangle_scheme_1
 approximation_triangle_scheme_1: $(HOST_SRCS)
-	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -DAPPROXIMATE_FUNCTION=approximation_triangle_scheme_1 -o '$@' $(LDFLAGS)
 
 .PHONY: approximation_triangle_scheme_2
 approximation_triangle_scheme_2: $(HOST_SRCS)
-	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -DAPPROXIMATE_FUNCTION=approximation_triangle_scheme_2 -o '$@' $(LDFLAGS)
 
 
@@ -134,9 +128,9 @@ endif
 
 cleanexe:
 	-$(RMDIR) approximation_motifs_scheme_1
-	-$(RMDIR) approximation_motifs_scheme_2
+	-$(RMDIR) approximation_motifs_scheme_3
 	-$(RMDIR) approximation_triangle_scheme_1
-	-$(RMDIR) approximation_triangle_scheme_2
+	-$(RMDIR) approximation_triangle_scheme_3
 clean:
 	-$(RMDIR) $(EXECUTABLE) $(XCLBIN)/{*sw_emu*,*hw_emu*} 
 	-$(RMDIR) sdaccel_* TempConfig system_estimate.xtxt *.rpt

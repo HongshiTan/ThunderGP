@@ -1,8 +1,6 @@
 
 #include "approximation.h"
 
-
-
 extern prng mt;
 
 int approximation_motifs_scheme_2(estimator *p_est, Graph* gptr, int edgeNum , int id)
@@ -33,20 +31,18 @@ int approximation_motifs_scheme_2(estimator *p_est, Graph* gptr, int edgeNum , i
         int ln = gptr->data[i][0];
         int rn = gptr->data[i][1];
 
-#if 1
+
         if ((ln == p_first->node[0]) || (rn == p_first->node[0]))
         {
             p_est->neighbor_flag = 1;
             adjacent_flag = 1;
         }
-#endif
-#if 1
         if ((ln == p_first->node[1]) || (rn == p_first->node[1]))
         {
             p_est->neighbor_flag = 0;
             adjacent_flag = 1;
         }
-#endif
+
         if (adjacent_flag == 1)
         {
             temp_neighbor_counter ++;
@@ -55,7 +51,7 @@ int approximation_motifs_scheme_2(estimator *p_est, Graph* gptr, int edgeNum , i
     p_est->status = 3;
     if (p_est->status == 3)
     {
-        p_est->success  = 1; 
+        p_est->success  = 1;
         p_est->neighbor_counter = temp_neighbor_counter;
         p_est->expecation = (double)(temp_neighbor_counter);
     }
@@ -106,49 +102,29 @@ int approximation_motifs_scheme_1(estimator *p_est, Graph* gptr, int edgeNum, in
 
 
             int adjacent_flag = 0;
-#if 0
-            if ((ln == p_first->node[0]))
-            {
-                p_est->neighbor_flag = 1;
-                adjacent_flag = 1;
-            }
-#endif
-#if 1
+
+
             if ((ln == p_first->node[0]) || (rn == p_first->node[0]))
             {
                 p_est->neighbor_flag = 1;
                 adjacent_flag = 1;
             }
-#endif
-#if 1
             if ((ln == p_first->node[1]) || (rn == p_first->node[1]))
             {
                 p_est->neighbor_flag = 0;
                 adjacent_flag = 1;
             }
-#endif
+
             if (adjacent_flag == 1)
             {
                 temp_neighbor_counter ++;
-#if 0
-                if (reservoir_sampling(temp_neighbor_counter, mt))
-                {
-                    p_est->second_edge.id = i;
-                    p_est->neighbor_counter = temp_neighbor_counter;
-                    p_est->status = 3;
-                }
-                else
-                {
-                    p_est->neighbor_counter ++;
-                }
-#endif
             }
         }
     }
     p_est->status = 3;
     if (p_est->status == 3)
     {
-        p_est->success  = 1; 
+        p_est->success  = 1;
         p_est->expecation = ((double)temp_neighbor_counter);
     }
     else
