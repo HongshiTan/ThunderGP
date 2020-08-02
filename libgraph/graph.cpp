@@ -91,6 +91,24 @@ Graph::Graph(const std::string& gName) {
     }
 }
 
+Graph::Graph(const std::string& gName,int flag) {
+
+    // Check if it is undirectional graph
+    auto found = gName.find("ungraph", 0);
+    if (found != std::string::npos)
+        isUgraph = true;
+    else
+        isUgraph = false;
+
+
+    loadFile(gName, data);
+    vertexNum = getMaxIdx(data) + 1;
+    edgeNum = (int)data.size();
+    std::cout << "vertex num: " << vertexNum << std::endl;
+    std::cout << "edge num: " << edgeNum << std::endl;
+    std::cout << "isUgraph: " << isUgraph << std::endl;
+}
+
 CSR::CSR(const Graph &g) : vertexNum(g.vertexNum), edgeNum(g.edgeNum) {
     rpao.resize(vertexNum + 1);
     rpai.resize(vertexNum + 1);
