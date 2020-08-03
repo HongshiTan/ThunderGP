@@ -11,7 +11,7 @@
 
 #define STRINGIFY_MACRO(x)              STR(x)
 #define STR(x)                          #x
-
+#define DUMP_CAPACITY(a)                DEBUG_PRINTF("mem size dump %s %u\n",#a, (uint32_t)a.capacity());
 
 #if 1
 

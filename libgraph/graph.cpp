@@ -9,7 +9,7 @@ void Graph::loadFile(
 )
 {
     std::ifstream fhandle;
-    fhandle.rdbuf()->pubsetbuf(0, 0);
+    //fhandle.rdbuf()->pubsetbuf(0, 0);
     fhandle.open(gName.c_str());
     if (!fhandle.is_open()) {
         HERE;
@@ -24,10 +24,11 @@ void Graph::loadFile(
             std::vector<int>(std::istream_iterator<int>(iss),
                              std::istream_iterator<int>())
         );
-        line.clear();
+        //line.clear();
+        //iss.clear();
     }
     fhandle.close();
-
+    std::cout<< "mem size dump data: "<< (unsigned int)data.capacity()<<std::endl;
     std::cout << "Graph " << gName << " is loaded." << std::endl;
 }
 
