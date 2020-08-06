@@ -43,7 +43,7 @@ object MotifCounting extends Logging{
 
     val options = mutable.Map(optionsList: _*)
 
-    val conf = new SparkConf()
+    val conf = new SparkConf().setMaster("local[2]")
     GraphXUtils.registerKryoClasses(conf)
 
 
@@ -107,6 +107,7 @@ object MotifCounting extends Logging{
 /* random get first edge */
           for( i <- 0 to (r-1)) {
             val loc = ran.nextInt(w)
+            println("rng " + loc)
             r1(i) = edgeList(loc)
             val tmpbuf = ltable.get(loc)
             if(tmpbuf == null){
@@ -117,6 +118,7 @@ object MotifCounting extends Logging{
             }
 
           for( k <- 0 to (w-1) ) {
+            println("e " + src +" "+dst)
             val src = edgeList(k).srcId
             val dst = edgeList(k).dstId
 /* degree build */

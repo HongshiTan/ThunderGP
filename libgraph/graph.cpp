@@ -8,7 +8,9 @@ void Graph::loadFile(
     std::vector<std::vector<int>> &data
 )
 {
-    std::ifstream fhandle(gName.c_str());
+    std::ifstream fhandle;
+    //fhandle.rdbuf()->pubsetbuf(0, 0);
+    fhandle.open(gName.c_str());
     if (!fhandle.is_open()) {
         HERE;
         std::cout << "Failed to open " << gName << std::endl;
@@ -22,9 +24,11 @@ void Graph::loadFile(
             std::vector<int>(std::istream_iterator<int>(iss),
                              std::istream_iterator<int>())
         );
+        //line.clear();
+        //iss.clear();
     }
     fhandle.close();
-
+    std::cout<< "mem size dump data: "<< (unsigned int)data.capacity()<<std::endl;
     std::cout << "Graph " << gName << " is loaded." << std::endl;
 }
 
@@ -89,6 +93,24 @@ Graph::Graph(const std::string& gName) {
         (*it)->inDeg = (int)(*it)->inVid.size();
         (*it)->outDeg = (int)(*it)->outVid.size();
     }
+}
+
+Graph::Graph(const std::string& gName,int flag) {
+
+    // Check if it is undirectional graph
+    auto found = gName.find("ungraph", 0);
+    if (found != std::string::npos)
+        isUgraph = true;
+    else
+        isUgraph = false;
+
+
+    loadFile(gName, data);
+    vertexNum = getMaxIdx(data) + 1;
+    edgeNum = (int)data.size();
+    std::cout << "vertex num: " << vertexNum << std::endl;
+    std::cout << "edge num: " << edgeNum << std::endl;
+    std::cout << "isUgraph: " << isUgraph << std::endl;
 }
 
 CSR::CSR(const Graph &g) : vertexNum(g.vertexNum), edgeNum(g.edgeNum) {

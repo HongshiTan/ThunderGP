@@ -41,6 +41,7 @@ class Graph{
         std::vector<std::vector<int>> data;
 
         Graph(const std::string &fName);
+        Graph(const std::string &fName,int flag);
         ~Graph(){
 			for(int i = 0; i < vertexNum; i++){
 				delete vertices[i];

@@ -19,7 +19,7 @@ endif
 
 #Checks for XILINX_SDX
 ifndef XILINX_SDX
-$(error XILINX_SDX variable is not set, please set correctly and rerun)
+$(info XILINX_SDX variable is not set, please set correctly and rerun)
 endif
 
 #Checks for XILINX_XRT

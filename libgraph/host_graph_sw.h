@@ -26,13 +26,7 @@
     }                                               \
 }
 
-typedef struct
-{
-    int vertexNum;
-    int compressedVertexNum;
-    int edgeNum;
-    int blkNum;
-} graphInfo;
+
 
 typedef struct
 {
@@ -178,7 +172,7 @@ int getStartIndex(void);
 double getCurrentTimestamp(void);
 
 
-Graph* createGraph(const std::string &gName, const std::string &mode);
+
 
 
 

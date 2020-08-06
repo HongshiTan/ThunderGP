@@ -4,14 +4,32 @@ date_str=`date +%Y%m%d%T`
 log_path=test_log_${date_str}
 mkdir -p ${log_path}
 
-./host_graph_fpga _x/link/int/graph_fpga.hw.xilinx_vcu1525_xdma_201830_1.xclbin rmat-19-32   > ./${log_path}/r19.log
-./host_graph_fpga _x/link/int/graph_fpga.hw.xilinx_vcu1525_xdma_201830_1.xclbin rmat-21-32   > ./${log_path}/r21.log
-./host_graph_fpga _x/link/int/graph_fpga.hw.xilinx_vcu1525_xdma_201830_1.xclbin rmat-24-16   > ./${log_path}/r24.log
+test() {
 
-./host_graph_fpga _x/link/int/graph_fpga.hw.xilinx_vcu1525_xdma_201830_1.xclbin mouse-gene   > ./${log_path}/mg.log
-./host_graph_fpga _x/link/int/graph_fpga.hw.xilinx_vcu1525_xdma_201830_1.xclbin pokec        > ./${log_path}/pk.log
-./host_graph_fpga _x/link/int/graph_fpga.hw.xilinx_vcu1525_xdma_201830_1.xclbin google       > ./${log_path}/gg.log
-./host_graph_fpga _x/link/int/graph_fpga.hw.xilinx_vcu1525_xdma_201830_1.xclbin wiki-talk    > ./${log_path}/wt.log
-./host_graph_fpga _x/link/int/graph_fpga.hw.xilinx_vcu1525_xdma_201830_1.xclbin lj1          > ./${log_path}/lj.log
-./host_graph_fpga _x/link/int/graph_fpga.hw.xilinx_vcu1525_xdma_201830_1.xclbin twitter-2010 > ./${log_path}/tw.log
+#./approximation_triangle_scheme_1 0 $1  > ./${log_path}/$2_$3_t1.log
+#./approximation_triangle_scheme_2 0 $1  > ./${log_path}/$2_$3_t2.log
+./approximation_triangle_scheme_3 0 $1  > ./${log_path}/$2_$3_t3.log
+#./approximation_motifs_scheme_1   0 $1  > ./${log_path}/$2_$3_m1.log
+#./approximation_motifs_scheme_2   0 $1  > ./${log_path}/$2_$3_m2.log
+./approximation_motifs_scheme_3 0 $1    > ./${log_path}/$2_$3_m3.log
 
+}
+
+#test /graph_data/citeseer.txt citeseer 1
+#test /graph_data/citeseer.txt citeseer 2
+#test /graph_data/citeseer.txt citeseer 3
+#test /graph_data/citeseer.txt citeseer 4
+#test /graph_data/citeseer.txt citeseer 5
+
+ 
+#test /graph_data/youtube.ungraph.txt  youtube 1
+#test /graph_data/youtube.ungraph.txt  youtube 2
+#test /graph_data/youtube.ungraph.txt  youtube 3
+#test /graph_data/youtube.ungraph.txt  youtube 4
+#test /graph_data/youtube.ungraph.txt  youtube 5
+
+test /graph_data/LiveJournal.txt  livejournal 1
+test /graph_data/LiveJournal.txt  livejournal 2
+test /graph_data/LiveJournal.txt  livejournal 3
+test /graph_data/LiveJournal.txt  livejournal 4
+test /graph_data/LiveJournal.txt  livejournal 5

@@ -27,7 +27,10 @@ include $(ABS_COMMON_REPO)/utils/opencl.mk
 #--xp prop:solution.kernel_compiler_margin=<Frequency Percentage>
 #--xp param:compiler.enableAutoFrequencyScaling=0
 
-HOST_SRCS = ./host_graph.cpp ./libgraph/graph.cpp ./libgraph/data_helper.cpp
+HOST_SRCS = ./host_graph.cpp  ./libgraph/graph.cpp ./libgraph/data_helper.cpp
+
+
+HOST_SRCS += motifs.cpp triangle.cpp
 
 ifeq ($(strip $(GP_SYSTEM)), $(strip $(VAR_TRUE)))
 
@@ -71,7 +74,7 @@ CXXFLAGS += -I $(APPCONFIG)
 
 # Host linker flags
 LDFLAGS := $(opencl_LDFLAGS)
-LDFLAGS += -lrt -lstdc++  -lxilinxopencl
+LDFLAGS += -lrt -lstdc++
 LDFLAGS += -lgmp -lboost_system -lboost_random
 
 ifeq ($(TARGET),$(filter $(TARGET), hw_emu))
@@ -100,10 +103,10 @@ BINARY_CONTAINERS += $(XCLBIN)/graph_fpga.$(TARGET).$(DSA).xclbin
 
 #Include Libraries
 
-include $(UTILS_PATH)/xcl/xcl.mk
-CXXFLAGS +=  $(xcl_CXXFLAGS)
-LDFLAGS +=   $(xcl_CXXFLAGS)
-HOST_SRCS += $(xcl_SRCS)
+#include $(UTILS_PATH)/xcl/xcl.mk
+#CXXFLAGS +=  $(xcl_CXXFLAGS)
+#LDFLAGS +=   $(xcl_CXXFLAGS)
+#HOST_SRCS += $(xcl_SRCS)
 
 
 #############################################################################

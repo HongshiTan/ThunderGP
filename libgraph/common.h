@@ -9,6 +9,9 @@
 
 #include "config.h"
 
+#define STRINGIFY_MACRO(x)              STR(x)
+#define STR(x)                          #x
+#define DUMP_CAPACITY(a)                DEBUG_PRINTF("mem size dump %s %u\n",#a, (uint32_t)a.capacity());
 
 #if 1
 
@@ -22,11 +25,20 @@
 
 
 #ifndef ARRAY_SIZE
-#define ARRAY_SIZE(arr) sizeof(arr)/sizeof((arr)[0])
+#define ARRAY_SIZE(arr) ((int)(sizeof(arr)/sizeof((arr)[0])))
 #endif
 
 
 #define SIZE_ALIGNMENT(in,align)     ((((((unsigned int)(in + 1))/(align)) + 1) * (align )) - 1) 
 
+typedef struct
+{
+    int vertexNum;
+    int compressedVertexNum;
+    int edgeNum;
+    int blkNum;
+} graphInfo;
+
+Graph* createGraph(const std::string &gName, const std::string &mode);
 
 #endif /* __COMMON_H__ */
