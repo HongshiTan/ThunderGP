@@ -317,7 +317,7 @@ int approximation_triangle_scheme_4(estimator *p_est, Graph* gptr, int edgeNum, 
 
 
     static int counter = 0;
-    unsigned long seed = id + static_cast<unsigned int>(std::time(0)) + (unsigned long)(p_est) + counter;
+    //unsigned long seed = id + static_cast<unsigned int>(std::time(0)) + (unsigned long)(p_est) + counter;
     pcg32_srandom_r(&lmt, 42u, counter + 54u);
     //DEBUG_PRINTF("seed %d \n",seed);
     //lmt.seed(seed);

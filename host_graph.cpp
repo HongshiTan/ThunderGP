@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
         }
         if (1)
         {
-            DEBUG_PRINTF("result %lf - %lf  with %lu, success %lu ratio %lf %lf\n", 
+            DEBUG_PRINTF("result %lf - %lf  with %llu, success %llu ratio %lf %lf\n", 
                         (double(result) * ((double)edgeNum / (total_est_num * SUB_EST))),
                          double(result),
                          total_est_num * SUB_EST,
