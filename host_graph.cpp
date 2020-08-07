@@ -63,14 +63,22 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-
-
-    int est_num_map [] = { 10, 20, 50, 100, 200, 500, 1000, 2000,
-                           5000, 10000
+    int est_num_map [] = {  10,       20,       50, 
+                            100,      200,      500, 
+                            1000,     2000,     5000, 
+                            10000,    20000,    50000,
+                            100000,   200000,   500000,
+                            1000000,  2000000,  5000000,
+                            10000000, 20000000, 50000000,
                          };
     int est_id = 0;
 
+#ifndef MAX_RUN_STEPS 
     const int total_k = ARRAY_SIZE(est_num_map);
+#else
+    const int total_k = MAX_RUN_STEPS;
+#endif
+
     for (int k = 0; k < total_k ; k ++)
     {
         est_num = est_num_map[k];
@@ -145,9 +153,11 @@ int main(int argc, char **argv) {
         }
         if (1)
         {
-            DEBUG_PRINTF("result %lf  with %d, success %d ratio %lf %lf\n", (double(result ) * ((double)edgeNum / total_est_num)),
+            DEBUG_PRINTF("result %lf - %lf  with %d, success %d ratio %lf %lf\n", 
+                        (double(result) * ((double)edgeNum / (total_est_num * SUB_EST))),
+                         double(result),
                          total_est_num * SUB_EST,
-                         success_counter, ((double)success_counter / total_est_num), ((double)result / (double)success_counter));
+                         success_counter, ((double)success_counter / (total_est_num * SUB_EST)), ((double)result / (double)success_counter));
 
         }
 

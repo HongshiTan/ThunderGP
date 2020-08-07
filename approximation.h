@@ -14,7 +14,6 @@ using namespace boost::random;
 
 
 #define MAX_NUM_ESTIMATOR   (1000 * 1000 * 10)
-#define SUB_EST             (1000)
 #define MAX_NUN_THREADS     (10)
 
 
@@ -28,6 +27,17 @@ typedef struct
 } sample_edge;
 
 
+typedef uint64_t   uint64_rng_t;
+typedef uint32_t   uint32_rng_t;
+
+
+struct pcg_state_setseq_64 {    // Internals are *Private*.
+    uint64_rng_t state;             // RNG state.  All values are possible.
+    uint64_rng_t inc;               // Controls which RNG sequence (stream) is
+                                   // selected. Must *always* be odd.
+};
+
+typedef struct pcg_state_setseq_64 pcg32_random_t;
 
 typedef struct {
     double expecation;
@@ -59,6 +69,9 @@ typedef struct
 } thread_item;
 
 
+void pcg32_srandom_r(pcg32_random_t* rng, uint64_t initstate, uint64_t initseq);
+int pcg_reservoir_sampling(int n, pcg32_random_t* rng);
+
 typedef mt11213b  prng;
 
 int approximation_motifs_scheme_1(estimator *p_est, Graph* gptr, int edgeNum, int id);
@@ -70,25 +83,14 @@ int triangle_count(Graph* gptr, CSR* csr, int num);
 int approximation_triangle_scheme_1(estimator *p_est, Graph* gptr, int edgeNum, int id);
 int approximation_triangle_scheme_2(estimator *p_est, Graph* gptr, int edgeNum, int id);
 int approximation_triangle_scheme_3(estimator *g_est, Graph* gptr, int edgeNum , int est_id);
+int approximation_triangle_scheme_4(estimator *g_est, Graph* gptr, int edgeNum , int est_id);
 
 extern prng  mt;
 
 extern pthread_mutex_t lock;
 
-inline int reservoir_sampling(int n, prng &lmt)
-{
-    boost::random::bernoulli_distribution<double> p(1.0 / (n));
-    pthread_mutex_lock(&lock);
-    bool res = p(mt);
-    pthread_mutex_unlock(&lock);
-    //DEBUG_PRINTF("n %d, res %d\n", n, res);
-    if (res)
-    {
-        return 1;
-    }
-    return 0;
-}
 
+int reservoir_sampling(int n, prng &lmt);
 
 
 
