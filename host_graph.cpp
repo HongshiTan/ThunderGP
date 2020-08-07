@@ -63,7 +63,8 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    int est_num_map [] = {  10,       20,       50, 
+    int est_num_map [] = {  1,        2,        5,
+                            10,       20,       50, 
                             100,      200,      500, 
                             1000,     2000,     5000, 
                             10000,    20000,    50000,
@@ -141,8 +142,8 @@ int main(int argc, char **argv) {
             //success_counter += approximation(p_est, gptr, csr);
         }
         double result = 0;
-        int total_est_num = 0;
-        int success_counter = 0;
+        unsigned long long total_est_num = 0;
+        unsigned long long success_counter = 0;
 
         for (int j = 0; j < ARRAY_SIZE(threads); j++)
         {
@@ -153,7 +154,7 @@ int main(int argc, char **argv) {
         }
         if (1)
         {
-            DEBUG_PRINTF("result %lf - %lf  with %d, success %d ratio %lf %lf\n", 
+            DEBUG_PRINTF("result %lf - %lf  with %lu, success %lu ratio %lf %lf\n", 
                         (double(result) * ((double)edgeNum / (total_est_num * SUB_EST))),
                          double(result),
                          total_est_num * SUB_EST,
