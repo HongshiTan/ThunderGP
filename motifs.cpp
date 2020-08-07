@@ -223,7 +223,6 @@ int approximation_motifs_scheme_3(estimator *g_est, Graph* gptr, int edgeNum , i
             g_est->success ++;
         }
     }
-    g_est->expecation = g_est->expecation / ((double) SUB_EST);
     free(vertex_deg);
     return  0;
 }
