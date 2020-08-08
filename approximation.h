@@ -70,13 +70,14 @@ typedef struct
 
 
 void pcg32_srandom_r(pcg32_random_t* rng, uint64_t initstate, uint64_t initseq);
-int pcg_reservoir_sampling(int n, pcg32_random_t* rng);
+
 
 typedef mt11213b  prng;
 
 int approximation_motifs_scheme_1(estimator *p_est, Graph* gptr, int edgeNum, int id);
 int approximation_motifs_scheme_2(estimator *p_est, Graph* gptr, int edgeNum, int id);
 int approximation_motifs_scheme_3(estimator *g_est, Graph* gptr, int edgeNum , int est_id);
+int approximation_motifs_scheme_4(estimator *g_est, Graph* gptr, int edgeNum , int est_id);
 
 int triangle_count(Graph* gptr, CSR* csr, int num);
 
@@ -90,7 +91,13 @@ extern prng  mt;
 extern pthread_mutex_t lock;
 
 
+int pcg_reservoir_sampling(int n, pcg32_random_t* rng);
 int reservoir_sampling(int n, prng &lmt);
+
+
+int rng_pcg_res_test(int edgeNum, int num);
+int rng_res_test(int edgeNum, int num);
+int rng_test(int edgeNum, int num);
 
 
 

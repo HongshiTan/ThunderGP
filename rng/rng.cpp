@@ -98,49 +98,47 @@ int pcg_reservoir_sampling_2(int n, pcg32_random_t* rng)
 
 int pcg_reservoir_sampling(int n, pcg32_random_t* rng)
 {
-    //uint32_t value = pcg32_random_r(rng);
-    //double p = pow(2,32) / ((double)n); 
-    uint32_t value = pcg32_boundedrand_r(rng, n << 4);
+    uint32_t value = pcg32_random_r(rng);
+    double p = pow(2,32) / ((double)n); 
+    //uint32_t value = pcg32_boundedrand_r(rng, n << 4);
     //boost::random::bernoulli_distribution<double> p(1.0 / (n));
     //pthread_mutex_lock(&lock);
     //bool res = p(mt);
     //pthread_mutex_unlock(&lock);
     //DEBUG_PRINTF("n %d, res %d\n", n, res);
-    if (value < (1 << 4))
-    //if (value < p )
+    //if (value < (1 << 4))
+    if (value < p )
     {
         return 1;
     }
     return 0;
 }
 
+//2987624
 
-
-int rng_test(CSR* csr, int num)
+int rng_test(int edgeNum, int num)
 {
     prng mt;
     static int counter = 0;
     mt.seed(static_cast<unsigned int>(std::time(0))  + counter);
 
     counter ++;
-    int edgeNum   = csr ->edgeNum;
     boost::random::uniform_int_distribution<mpz_int> ui(0, edgeNum - 1);
     for (int i = 0; i < num; i ++)
     {
         int loc = static_cast<int>(ui(mt));
-        DEBUG_PRINTF("rng %d %d \n", loc , edgeNum);
+        DEBUG_PRINTF("%d %d \n", loc , edgeNum);
     }
     return 0;
 }
 
-int rng_res_test(CSR* csr, int num)
+int rng_res_test(int edgeNum, int num)
 {
     prng mt;
     static int counter = 0;
     mt.seed(static_cast<unsigned int>(std::time(0))  + counter);
 
     counter ++;
-    int edgeNum   = csr ->edgeNum;
     for (int i = 0; i < num; i ++)
     {
         int loc = 0;
@@ -152,7 +150,30 @@ int rng_res_test(CSR* csr, int num)
             }
         }
 
-        DEBUG_PRINTF("rng %d %d \n", loc , edgeNum);
+        DEBUG_PRINTF("%d %d \n", loc , edgeNum);
+    }
+    return 0;
+}
+
+int rng_pcg_res_test(int edgeNum, int num)
+{
+    pcg32_random_t mt;
+    static int counter = 0;
+    pcg32_srandom_r(&mt, 0x853c49e6748fea9bULL,  0xda3e39cb94b95bdbULL );
+
+    counter ++;
+    for (int i = 0; i < num; i ++)
+    {
+        int loc = 0;
+        for (int k = 0; k < edgeNum; k ++)
+        {
+            if (pcg_reservoir_sampling(k + 1, &mt) )
+            {
+                loc = k;
+            }
+        }
+
+        DEBUG_PRINTF("%d %d \n", loc , edgeNum);
     }
     return 0;
 }

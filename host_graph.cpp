@@ -42,6 +42,8 @@ int main(int argc, char **argv) {
     {
         gName = "rmat-19-32";
     }
+    //rng_pcg_res_test(100,100000);
+    //return 0;
 
     int est_num = (argc < 4) ? 1000 : std::stoi(argv[3]);
     int printf_flag = std::stoi(argv[1]);
@@ -70,7 +72,7 @@ int main(int argc, char **argv) {
                             10000,    20000,    50000,
                             100000,   200000,   500000,
                             1000000,  2000000,  5000000,
-                            10000000, 20000000, 50000000,
+ //                           10000000, 20000000, 50000000,
                          };
     int est_id = 0;
 
@@ -83,6 +85,7 @@ int main(int argc, char **argv) {
     for (int k = 0; k < total_k ; k ++)
     {
         est_num = est_num_map[k];
+        //est_num = 100000;
         boost::random::uniform_int_distribution<mpz_int> iui(0, (edgeNum - 1) );
 
 
@@ -158,7 +161,9 @@ int main(int argc, char **argv) {
                         (double(result) * ((double)edgeNum / (total_est_num * SUB_EST))),
                          double(result),
                          total_est_num * SUB_EST,
-                         success_counter, ((double)success_counter / (total_est_num * SUB_EST)), ((double)result / (double)success_counter));
+                         success_counter, 
+                         ((double)success_counter / (total_est_num * SUB_EST)), 
+                         ((double)result / (double)success_counter));
 
         }
 

@@ -75,6 +75,7 @@ int approximation_triangle_scheme_2(estimator *p_est, Graph* gptr, int edgeNum, 
     {
         return 0;
     }
+    p_est->neighbor_counter = p_est->tmp_neighbor_counter;
     uniform_int_distribution<mpz_int> second_sample(0, p_est->tmp_neighbor_counter  - 1);
     int l2_edge = static_cast<int>(second_sample(mt));
     if (l2_edge != 0)
@@ -170,10 +171,12 @@ int approximation_triangle_scheme_2(estimator *p_est, Graph* gptr, int edgeNum, 
         if (match_flag == 1)
         {
             p_est->status = 3;
+            p_est->success = 1;
             p_est->expecation = (double)(p_est->tmp_neighbor_counter - p_est->tmp_rng + 1);
             return 1;
         }
     }
+    p_est->success = 0;
     return  0;
 }
 
@@ -309,16 +312,16 @@ int approximation_triangle_scheme_1(estimator *p_est, Graph* gptr, int edgeNum, 
 }
 
 
-
-
 int approximation_triangle_scheme_4(estimator *p_est, Graph* gptr, int edgeNum, int id)
 {
     pcg32_random_t lmt;
+    pcg32_random_t inner;
 
 
     static int counter = 0;
     //unsigned long seed = id + static_cast<unsigned int>(std::time(0)) + (unsigned long)(p_est) + counter;
-    pcg32_srandom_r(&lmt, 42u, counter + 54u);
+    pcg32_srandom_r(&lmt, 0x853c49e6748fea9bULL,  0xda3e39cb94b95bdbULL + counter);
+    pcg32_srandom_r(&inner, 0x853c49e6748fea9bULL, 0xda3e39cb94b95bdbULL + counter + id);
     //DEBUG_PRINTF("seed %d \n",seed);
     //lmt.seed(seed);
     //lmt2.seed(seed + 10);
@@ -357,17 +360,21 @@ int approximation_triangle_scheme_4(estimator *p_est, Graph* gptr, int edgeNum, 
 
             if ((ln == p_first->node[0]) || (rn == p_first->node[0]))
             {
-                adjacent_flag = 1;
+                adjacent_flag ++;
             }
             if ((ln == p_first->node[1]) || (rn == p_first->node[1]))
             {
-                adjacent_flag = 1;
+                adjacent_flag ++;
             }
-            if (adjacent_flag == 1)
+            if (adjacent_flag != 0 )
             {
+                if(adjacent_flag > 1)
+                {
+                    DEBUG_PRINTF("bug\n");
+                }
                 temp_neighbor_counter ++;
 #if 1
-                if (pcg_reservoir_sampling(temp_neighbor_counter, &lmt))
+                if (pcg_reservoir_sampling(temp_neighbor_counter, &inner))
                 {
                     p_est->second_edge.node[0] = gptr->data[i][0];
                     p_est->second_edge.node[1] = gptr->data[i][1];
@@ -430,6 +437,7 @@ int approximation_triangle_scheme_4(estimator *p_est, Graph* gptr, int edgeNum, 
                         }
                     }
                 }
+
 #endif
             }
         }

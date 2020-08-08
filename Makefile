@@ -74,6 +74,11 @@ approximation_motifs_scheme_3: $(HOST_SRCS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -DAPPROXIMATE_FUNCTION=approximation_motifs_scheme_3 -DMAX_RUN_STEPS=12 -DSUB_EST=1000  -o '$@' $(LDFLAGS)
 
 
+.PHONY: approximation_motifs_scheme_4
+approximation_motifs_scheme_4: $(HOST_SRCS)
+	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -DAPPROXIMATE_FUNCTION=approximation_motifs_scheme_4 -DMAX_RUN_STEPS=21 -DSUB_EST=1  -o '$@' $(LDFLAGS)
+
+
 .PHONY: approximation_triangle_scheme_3
 approximation_triangle_scheme_3: $(HOST_SRCS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -DAPPROXIMATE_FUNCTION=approximation_triangle_scheme_3 -DMAX_RUN_STEPS=12 -DSUB_EST=1000 -o '$@' $(LDFLAGS)
@@ -99,7 +104,7 @@ approximation_triangle_scheme_1: $(HOST_SRCS)
 
 .PHONY: approximation_triangle_scheme_2
 approximation_triangle_scheme_2: $(HOST_SRCS)
-	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -DAPPROXIMATE_FUNCTION=approximation_triangle_scheme_2 -DSUB_EST=1 -o '$@' $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -DAPPROXIMATE_FUNCTION=approximation_triangle_scheme_2 -DSUB_EST=1 -DMAX_RUN_STEPS=21  -o '$@' $(LDFLAGS)
 
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
