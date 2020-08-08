@@ -90,7 +90,7 @@ extern prng  mt;
 
 extern pthread_mutex_t lock;
 
-
+uint32_t pcg32_random_r(pcg32_random_t* rng);
 int pcg_reservoir_sampling(int n, pcg32_random_t* rng);
 int reservoir_sampling(int n, prng &lmt);
 

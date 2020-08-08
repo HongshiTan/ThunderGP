@@ -125,7 +125,9 @@ int main(int argc, char **argv) {
                 sample_edge * p_second = &p_est->second_edge;
                 if  (printf_flag == 1)
                 {
-                    DEBUG_PRINTF("%d nc %d (%d %d) %d-[%d %d] %d-[%d %d] --> %f\n",
+                    if (p_est->status == 3)
+                    {
+                        DEBUG_PRINTF("%d nc %d (%d %d) %d-[%d %d] %d-[%d %d] --> %f\n",
                                  p_est->status ,
                                  p_est->neighbor_counter,
                                  p_first->update_counter,
@@ -137,6 +139,7 @@ int main(int argc, char **argv) {
                                  p_second->node[0],
                                  p_second->node[1],
                                  p_est->expecation);
+                    }
                 }
             }
 

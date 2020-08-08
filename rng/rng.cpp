@@ -99,7 +99,7 @@ int pcg_reservoir_sampling_2(int n, pcg32_random_t* rng)
 int pcg_reservoir_sampling(int n, pcg32_random_t* rng)
 {
     uint32_t value = pcg32_random_r(rng);
-    double p = pow(2,32) / ((double)n); 
+    double p = (double (pow(2,32))) / ((double)n); 
     //uint32_t value = pcg32_boundedrand_r(rng, n << 4);
     //boost::random::bernoulli_distribution<double> p(1.0 / (n));
     //pthread_mutex_lock(&lock);
