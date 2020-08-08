@@ -37,8 +37,9 @@ int approximation_triangle_scheme_2(estimator *p_est, Graph* gptr, int edgeNum, 
     sample_edge * p_first    = &p_est->first_edge;
     //sample_edge * p_second    = &p_est->second_edge;
 
-
+    pthread_mutex_lock(&lock);
     int start_edge = static_cast<int>(first_sample(mt));
+    pthread_mutex_unlock(&lock);
     p_est->first_edge.node[0] = gptr->data[start_edge][0];
     p_est->first_edge.node[1] = gptr->data[start_edge][1];
     p_est->first_edge.id = start_edge;
@@ -77,7 +78,9 @@ int approximation_triangle_scheme_2(estimator *p_est, Graph* gptr, int edgeNum, 
     }
     p_est->neighbor_counter = p_est->tmp_neighbor_counter;
     uniform_int_distribution<mpz_int> second_sample(0, p_est->tmp_neighbor_counter  - 1);
+    pthread_mutex_lock(&lock);
     int l2_edge = static_cast<int>(second_sample(mt));
+    pthread_mutex_unlock(&lock);
     if (l2_edge != 0)
     {
         //    DEBUG_PRINTF("%d \n",l2_edge);
