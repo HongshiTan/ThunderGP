@@ -35,6 +35,7 @@ struct pcg_state_setseq_64 {    // Internals are *Private*.
     uint64_rng_t state;             // RNG state.  All values are possible.
     uint64_rng_t inc;               // Controls which RNG sequence (stream) is
                                    // selected. Must *always* be odd.
+    uint32_t sub;
 };
 
 typedef struct pcg_state_setseq_64 pcg32_random_t;
@@ -70,6 +71,7 @@ typedef struct
 
 
 void pcg32_srandom_r(pcg32_random_t* rng, uint64_t initstate, uint64_t initseq);
+void pcg32_set_sub(pcg32_random_t* rng, uint32_t value);
 
 
 typedef mt11213b  prng;

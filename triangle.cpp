@@ -323,8 +323,9 @@ int approximation_triangle_scheme_4(estimator *p_est, Graph* gptr, int edgeNum, 
 
     static int counter = 0;
     //unsigned long seed = id + static_cast<unsigned int>(std::time(0)) + (unsigned long)(p_est) + counter;
-    pcg32_srandom_r(&lmt, 0x853c49e6748fea9bULL,  0xda3e39cb94b95bdbULL + counter);
+    pcg32_srandom_r(&lmt, 0x853c49e6748fea9bULL,  0xda3e39cb94b95bdbULL );
     pcg32_srandom_r(&inner, 0x853c49e6748fea9bULL, 0xda3e39cb94b95bdbULL + counter + id);
+    pcg32_set_sub (&lmt,counter * 2 );
     //DEBUG_PRINTF("seed %d \n",seed);
     //lmt.seed(seed);
     //lmt2.seed(seed + 10);
