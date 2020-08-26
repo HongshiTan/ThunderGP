@@ -17,3 +17,7 @@ echo "lj"
 cat $1/lj.log 	| grep $2
 echo "tw"
 cat $1/tw.log 	| grep $2
+
+
+
+#[[:blank:]]

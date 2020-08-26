@@ -37,8 +37,9 @@ int approximation_triangle_scheme_2(estimator *p_est, Graph* gptr, int edgeNum, 
     sample_edge * p_first    = &p_est->first_edge;
     //sample_edge * p_second    = &p_est->second_edge;
 
-
+    pthread_mutex_lock(&lock);
     int start_edge = static_cast<int>(first_sample(mt));
+    pthread_mutex_unlock(&lock);
     p_est->first_edge.node[0] = gptr->data[start_edge][0];
     p_est->first_edge.node[1] = gptr->data[start_edge][1];
     p_est->first_edge.id = start_edge;
@@ -75,8 +76,11 @@ int approximation_triangle_scheme_2(estimator *p_est, Graph* gptr, int edgeNum, 
     {
         return 0;
     }
+    p_est->neighbor_counter = p_est->tmp_neighbor_counter;
     uniform_int_distribution<mpz_int> second_sample(0, p_est->tmp_neighbor_counter  - 1);
+    pthread_mutex_lock(&lock);
     int l2_edge = static_cast<int>(second_sample(mt));
+    pthread_mutex_unlock(&lock);
     if (l2_edge != 0)
     {
         //    DEBUG_PRINTF("%d \n",l2_edge);
@@ -170,10 +174,12 @@ int approximation_triangle_scheme_2(estimator *p_est, Graph* gptr, int edgeNum, 
         if (match_flag == 1)
         {
             p_est->status = 3;
+            p_est->success = 1;
             p_est->expecation = (double)(p_est->tmp_neighbor_counter - p_est->tmp_rng + 1);
             return 1;
         }
     }
+    p_est->success = 0;
     return  0;
 }
 
@@ -286,7 +292,7 @@ int approximation_triangle_scheme_1(estimator *p_est, Graph* gptr, int edgeNum, 
                         }
                         if (match_flag == 1)
                         {
-                            p_est->neighbor_counter = temp_neighbor_counter + 1;
+                            p_est->neighbor_counter = temp_neighbor_counter;
                             p_est->status = 3;
 
                             //break;
@@ -303,6 +309,156 @@ int approximation_triangle_scheme_1(estimator *p_est, Graph* gptr, int edgeNum, 
     }
     else
     {
+        p_est->expecation = 0;
+    }
+    return  0;
+}
+
+
+int approximation_triangle_scheme_4(estimator *p_est, Graph* gptr, int edgeNum, int id)
+{
+    pcg32_random_t lmt;
+    pcg32_random_t inner;
+
+
+    static int counter = 0;
+    //unsigned long seed = id + static_cast<unsigned int>(std::time(0)) + (unsigned long)(p_est) + counter;
+    pcg32_srandom_r(&lmt, 0x853c49e6748fea9bULL,  0xda3e39cb94b95bdbULL );
+    pcg32_srandom_r(&inner, 0x853c49e6748fea9bULL, 0xda3e39cb94b95bdbULL + counter + id);
+    pcg32_set_sub (&lmt,counter * 2 );
+    //DEBUG_PRINTF("seed %d \n",seed);
+    //lmt.seed(seed);
+    //lmt2.seed(seed + 10);
+
+    counter ++;
+    memset(p_est, 0, sizeof(estimator));
+
+    sample_edge * p_first    = &p_est->first_edge;
+    sample_edge * p_second    = &p_est->second_edge;
+
+    p_est->status = 0;
+    p_est->expecation = 0;
+
+    int start_index = 0;//edgeNum / 200 * (id % 100) + id ;
+    int temp_neighbor_counter  = 0;
+    int node1, node2;
+    for (int i = start_index; i < edgeNum; i++)
+    {
+        if (pcg_reservoir_sampling(i + 1, &lmt) )
+        {
+            p_est->first_edge.node[0] = gptr->data[i][0];
+            p_est->first_edge.node[1] = gptr->data[i][1];
+            p_first->update_counter ++;
+            p_second->update_counter  = 0;
+            temp_neighbor_counter = 0;
+
+            p_est->status = 1;
+            p_est->first_edge.id = i;
+        }
+        else
+        {
+            //pcg32_random_r(&inner);
+            int ln = gptr->data[i][0];
+            int rn = gptr->data[i][1];
+
+
+            int adjacent_flag = 0;
+
+            if ((ln == p_first->node[0]) || (rn == p_first->node[0]))
+            {
+                adjacent_flag ++;
+            }
+            if ((ln == p_first->node[1]) || (rn == p_first->node[1]))
+            {
+                adjacent_flag ++;
+            }
+            if (adjacent_flag != 0 )
+            {
+                if (adjacent_flag > 1)
+                {
+                    DEBUG_PRINTF("bug\n");
+                }
+                temp_neighbor_counter ++;
+#if 1
+                if (pcg_reservoir_sampling(temp_neighbor_counter, &inner))
+                {
+                    p_second->update_counter ++;
+                    p_est->second_edge.node[0] = gptr->data[i][0];
+                    p_est->second_edge.node[1] = gptr->data[i][1];
+                    p_est->second_edge.id = i;
+                    p_est->neighbor_counter = 0;
+
+                    if (p_est->second_edge.node[0] == p_est->first_edge.node[0])
+                    {
+                        node1 = p_est->second_edge.node[1];
+                        node2 = p_est->first_edge.node[1];
+                    }
+                    else if (p_est->second_edge.node[0] == p_est->first_edge.node[1])
+                    {
+                        node1 = p_est->second_edge.node[1];
+                        node2 = p_est->first_edge.node[0];
+                    }
+                    else if (p_est->second_edge.node[1] == p_est->first_edge.node[0])
+                    {
+                        node1 = p_est->second_edge.node[0];
+                        node2 = p_est->first_edge.node[1];
+                    }
+                    else if (p_est->second_edge.node[1] == p_est->first_edge.node[1])
+                    {
+                        node1 = p_est->second_edge.node[0];
+                        node2 = p_est->first_edge.node[0];
+                    }
+                    else
+                    {
+                        DEBUG_PRINTF("l2 %d %d \n", p_est->tmp_neighbor_counter,
+                                     p_est->tmp_rng);
+                        DEBUG_PRINTF("error connect : (%d %d) (%d %d)\n",
+                                     p_est->first_edge.node[0],
+                                     p_est->first_edge.node[1],
+                                     p_est->second_edge.node[0],
+                                     p_est->second_edge.node[1]);
+                    }
+                    p_est->status = 2;
+                }
+                else
+                {
+                    if (p_est->status == 2)
+                    {
+
+                        //p_est->neighbor_counter ++;
+                        int match_flag = 0;
+                        if ((ln == node1) && (rn == node2))
+                        {
+                            match_flag = 1;
+                        }
+                        else if ((ln == node2) && (rn == node1))
+                        {
+                            match_flag = 1;
+                        }
+                        if (match_flag == 1)
+                        {
+                            p_est->temp_neighbor_counter = temp_neighbor_counter;
+                            p_est->status = 3;
+
+                            //break;
+                        }
+                    }
+                }
+
+#endif
+            }
+        }
+    }
+    if (p_est->status == 3)
+    {
+        p_est->success = 1;
+        p_est->neighbor_counter = temp_neighbor_counter;
+        p_est->expecation = ((double)p_est->neighbor_counter);
+    }
+    else
+    {
+        p_est->neighbor_counter = 0;
+        p_est->success = 0;
         p_est->expecation = 0;
     }
     return  0;
@@ -410,7 +566,7 @@ int approximation_triangle_scheme_3(estimator *g_est, Graph* gptr, int edgeNum ,
         if (sub[i].neighbor_counter > 0)
         {
             uniform_int_distribution<mpz_int> second_sample(1, sub[i].neighbor_counter);
-            
+
             int rng = static_cast<int>(second_sample(mt));
             sub[i].tmp_rng = rng;
             int selected_deg;
@@ -639,7 +795,7 @@ int approximation_triangle_scheme_3(estimator *g_est, Graph* gptr, int edgeNum ,
 
 
     g_est->status = 3;
-    g_est->expecation = result / ((double)SUB_EST);
+    g_est->expecation = (double)result;
     g_est->success = success;
     free(vertex_deg);
     free(tmp_deg);

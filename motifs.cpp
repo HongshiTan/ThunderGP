@@ -79,6 +79,7 @@ int approximation_motifs_scheme_1(estimator *p_est, Graph* gptr, int edgeNum, in
     //sample_edge * p_second    = &p_est->second_edge;
 
     p_est->status = 0;
+    p_est->success = 0;
     p_est->expecation = 0;
 
     int start_index = 0;//edgeNum / 200 * (id % 100) + id ;
@@ -223,7 +224,77 @@ int approximation_motifs_scheme_3(estimator *g_est, Graph* gptr, int edgeNum , i
             g_est->success ++;
         }
     }
-    g_est->expecation = g_est->expecation / ((double) SUB_EST);
     free(vertex_deg);
+    return  0;
+}
+
+
+int approximation_motifs_scheme_4(estimator *p_est, Graph* gptr, int edgeNum, int id)
+{
+    pcg32_random_t lmt;
+    static int counter = 0;
+    //DEBUG_PRINTF("seed %d \n",seed);
+    pcg32_srandom_r(&lmt, 0x853c49e6748fea9bULL,  0xda3e39cb94b95bdbULL + counter);
+    counter ++;
+    memset(p_est, 0, sizeof(estimator));
+
+
+    sample_edge * p_first    = &p_est->first_edge;
+    //sample_edge * p_second    = &p_est->second_edge;
+
+    p_est->status = 0;
+    p_est->success = 0;
+    p_est->expecation = 0;
+
+    int start_index = 0;//edgeNum / 200 * (id % 100) + id ;
+    int temp_neighbor_counter  = 0;
+    for (int i = start_index; i < edgeNum; i++)
+    {
+        if (pcg_reservoir_sampling(i + 1, &lmt) )
+        {
+            p_est->first_edge.node[0] = gptr->data[i][0];
+            p_est->first_edge.node[1] = gptr->data[i][1];
+            p_first->update_counter ++;
+            temp_neighbor_counter = 0;
+            p_est->neighbor_counter = 0;
+            p_est->status = 1;
+            p_est->first_edge.id = i;
+        }
+        else
+        {
+            int ln = gptr->data[i][0];
+            int rn = gptr->data[i][1];
+
+
+            int adjacent_flag = 0;
+
+
+            if ((ln == p_first->node[0]) || (rn == p_first->node[0]))
+            {
+                p_est->neighbor_flag = 1;
+                adjacent_flag = 1;
+            }
+            if ((ln == p_first->node[1]) || (rn == p_first->node[1]))
+            {
+                p_est->neighbor_flag = 0;
+                adjacent_flag = 1;
+            }
+
+            if (adjacent_flag == 1)
+            {
+                temp_neighbor_counter ++;
+            }
+        }
+    }
+    p_est->status = 3;
+    if (p_est->status == 3)
+    {
+        p_est->success  = 1;
+        p_est->expecation = ((double)temp_neighbor_counter);
+    }
+    else
+    {
+        p_est->expecation = 0;
+    }
     return  0;
 }

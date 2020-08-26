@@ -29,7 +29,7 @@ include $(ABS_COMMON_REPO)/utils/opencl.mk
 
 HOST_SRCS = ./host_graph.cpp  ./libgraph/graph.cpp ./libgraph/data_helper.cpp
 
-
+HOST_SRCS += ./rng/rng.cpp
 HOST_SRCS += motifs.cpp triangle.cpp
 
 ifeq ($(strip $(GP_SYSTEM)), $(strip $(VAR_TRUE)))

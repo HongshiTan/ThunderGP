@@ -42,6 +42,8 @@ int main(int argc, char **argv) {
     {
         gName = "rmat-19-32";
     }
+    //rng_pcg_res_test(100,100000);
+    //return 0;
 
     int est_num = (argc < 4) ? 1000 : std::stoi(argv[3]);
     int printf_flag = std::stoi(argv[1]);
@@ -62,18 +64,28 @@ int main(int argc, char **argv) {
         printf("\n mutex init failed\n");
         return 1;
     }
-
-
-
-    int est_num_map [] = { 10, 20, 50, 100, 200, 500, 1000, 2000,
-                           5000, 10000
+    /* TODO: replace by auto-generation */
+    int est_num_map [] = {  1,        2,        5,
+                            10,       20,       50, 
+                            100,      200,      500, 
+                            1000,     2000,     5000, 
+                            10000,    20000,    50000,
+                            100000,   200000,   500000,
+                            1000000,  2000000,  5000000,
+ //                           10000000, 20000000, 50000000,
                          };
     int est_id = 0;
 
+#ifndef MAX_RUN_STEPS 
     const int total_k = ARRAY_SIZE(est_num_map);
+#else
+    const int total_k = MAX_RUN_STEPS;
+#endif
+
     for (int k = 0; k < total_k ; k ++)
     {
         est_num = est_num_map[k];
+        //est_num = 100000;
         boost::random::uniform_int_distribution<mpz_int> iui(0, (edgeNum - 1) );
 
 
@@ -113,7 +125,9 @@ int main(int argc, char **argv) {
                 sample_edge * p_second = &p_est->second_edge;
                 if  (printf_flag == 1)
                 {
-                    DEBUG_PRINTF("%d nc %d (%d %d) %d-[%d %d] %d-[%d %d] --> %f\n",
+                    if (p_est->status == 3)
+                    {
+                        DEBUG_PRINTF("%d nc %d (%d %d) %d-[%d %d] %d-[%d %d] --> %f\n",
                                  p_est->status ,
                                  p_est->neighbor_counter,
                                  p_first->update_counter,
@@ -125,6 +139,7 @@ int main(int argc, char **argv) {
                                  p_second->node[0],
                                  p_second->node[1],
                                  p_est->expecation);
+                    }
                 }
             }
 
@@ -133,8 +148,8 @@ int main(int argc, char **argv) {
             //success_counter += approximation(p_est, gptr, csr);
         }
         double result = 0;
-        int total_est_num = 0;
-        int success_counter = 0;
+        unsigned long long total_est_num = 0;
+        unsigned long long success_counter = 0;
 
         for (int j = 0; j < ARRAY_SIZE(threads); j++)
         {
@@ -145,9 +160,13 @@ int main(int argc, char **argv) {
         }
         if (1)
         {
-            DEBUG_PRINTF("result %lf  with %d, success %d ratio %lf %lf\n", (double(result ) * ((double)edgeNum / total_est_num)),
+            DEBUG_PRINTF("result %lf - %lf  with %llu, success %llu ratio %lf %lf\n", 
+                        (double(result) * ((double)edgeNum / (total_est_num * SUB_EST))),
+                         double(result),
                          total_est_num * SUB_EST,
-                         success_counter, ((double)success_counter / total_est_num), ((double)result / (double)success_counter));
+                         success_counter, 
+                         ((double)success_counter / (total_est_num * SUB_EST)), 
+                         ((double)result / (double)success_counter));
 
         }
 
