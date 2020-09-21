@@ -42,6 +42,14 @@ int main(int argc, char **argv) {
     {
         gName = "rmat-19-32";
     }
+    pcg32_random_t lmt;
+    pcg32_srandom_r(&lmt, 0x853c49e6748fea9bULL,  0 );
+    //s: 0xea1b84321029ee21, i: 0xb47c73972972b7b7, b: 0x0000000000000000
+    for(int i = 0; i < 4096; i++)
+    {
+        DEBUG_PRINTF("r%04d: 0x%08x\n",i, pcg32_random_r(&lmt));
+    }
+    return 0;
     //rng_pcg_res_test(100,100000);
     //return 0;
 
@@ -66,17 +74,17 @@ int main(int argc, char **argv) {
     }
     /* TODO: replace by auto-generation */
     int est_num_map [] = {  1,        2,        5,
-                            10,       20,       50, 
-                            100,      200,      500, 
-                            1000,     2000,     5000, 
+                            10,       20,       50,
+                            100,      200,      500,
+                            1000,     2000,     5000,
                             10000,    20000,    50000,
                             100000,   200000,   500000,
                             1000000,  2000000,  5000000,
- //                           10000000, 20000000, 50000000,
+//                           10000000, 20000000, 50000000,
                          };
     int est_id = 0;
 
-#ifndef MAX_RUN_STEPS 
+#ifndef MAX_RUN_STEPS
     const int total_k = ARRAY_SIZE(est_num_map);
 #else
     const int total_k = MAX_RUN_STEPS;
@@ -128,17 +136,17 @@ int main(int argc, char **argv) {
                     if (p_est->status == 3)
                     {
                         DEBUG_PRINTF("%d nc %d (%d %d) %d-[%d %d] %d-[%d %d] --> %f\n",
-                                 p_est->status ,
-                                 p_est->neighbor_counter,
-                                 p_first->update_counter,
-                                 p_second->update_counter,
-                                 p_first->id,
-                                 p_first->node[0],
-                                 p_first->node[1],
-                                 p_second->id,
-                                 p_second->node[0],
-                                 p_second->node[1],
-                                 p_est->expecation);
+                                     p_est->status ,
+                                     p_est->neighbor_counter,
+                                     p_first->update_counter,
+                                     p_second->update_counter,
+                                     p_first->id,
+                                     p_first->node[0],
+                                     p_first->node[1],
+                                     p_second->id,
+                                     p_second->node[0],
+                                     p_second->node[1],
+                                     p_est->expecation);
                     }
                 }
             }
@@ -160,12 +168,12 @@ int main(int argc, char **argv) {
         }
         if (1)
         {
-            DEBUG_PRINTF("result %lf - %lf  with %llu, success %llu ratio %lf %lf\n", 
-                        (double(result) * ((double)edgeNum / (total_est_num * SUB_EST))),
+            DEBUG_PRINTF("result %lf - %lf  with %llu, success %llu ratio %lf %lf\n",
+                         (double(result) * ((double)edgeNum / (total_est_num * SUB_EST))),
                          double(result),
                          total_est_num * SUB_EST,
-                         success_counter, 
-                         ((double)success_counter / (total_est_num * SUB_EST)), 
+                         success_counter,
+                         ((double)success_counter / (total_est_num * SUB_EST)),
                          ((double)result / (double)success_counter));
 
         }

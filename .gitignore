@@ -16,3 +16,5 @@ xclbin*
 sdaccel.ini
 .run
 csr
+approx*
+*.txt

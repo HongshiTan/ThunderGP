@@ -30,12 +30,12 @@ void pcg32_srandom_r(pcg32_random_t* rng, uint64_t initstate, uint64_t initseq)
     rng->state += initstate;
     pcg32_random_r(rng);
     rng->sub = 0;
+    DEBUG_PRINTF("s: 0x%016lx, i: 0x%016lx, b: 0x%016x  \n",rng->state,rng->inc,rng->sub);
 }
 
 
 void pcg32_set_sub(pcg32_random_t* rng, uint32_t value)
 {
-
     rng->sub = value;
 }
 
